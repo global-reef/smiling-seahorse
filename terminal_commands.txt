@@ -1,0 +1,8 @@
+#### terminal commands to start up notebook 
+
+export BROWSER="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+
+jupyter notebook
+
+# password on jupyter 
+bart
