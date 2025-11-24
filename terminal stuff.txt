@@ -1,0 +1,28 @@
+#### building an interactive validation tool 
+
+## step 1: set up 
+# check wd is correct 
+cd path/to/shark-ray-scraper
+
+# install streamlit 
+pip install streamlit
+
+## step 2: create validator_app.py 
+# in terminal
+touch validator_app.py # creates a blank python file in current folder 
+
+# open VS code 
+# press cmd+Shift+P
+Shell Command: Install 'code' command in PATH # that allows us to run "code" from the terminal
+
+# now back in terminal 
+code validator_app.py # opens the file 
+
+# work on the file in VS code 
+
+# back in terminal 
+# run it 
+streamlit run validator_app.py 
+
+
+
