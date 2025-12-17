@@ -140,7 +140,9 @@ else:
             "notes": notes,
             "N_observed": N_observed
         }
+        st.cache_data.clear()   # <- add this
         st.success("Saved!")
+        st.rerun()    # and this 
 
 # Skip entire URL option
 if skip_url:
