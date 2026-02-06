@@ -26,7 +26,7 @@ streamlit run validator_app.py
 
 
 
-### when you want to end the session run this in a new temrinal (click the plus)
+### when you want to end the session run this in a new temrinal (click the plus or CTRL+SHIFT+C)
 # this allows the validated sightings to be saved 
 git add data/validated_sightings.csv
 git commit -m "Update validated sightings"
