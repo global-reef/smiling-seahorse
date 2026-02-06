@@ -153,8 +153,9 @@ write_csv(
 
 
 
-### build final elasmos dataset ####
 
+
+### build final elasmos dataset ####
 
 elasmos <- sightings_valid %>%
   mutate(
@@ -166,60 +167,66 @@ elasmos <- sightings_valid %>%
     region          = iconv(region, from = "", to = "UTF-8", sub = ""),
     country         = iconv(country, from = "", to = "UTF-8", sub = ""),
     
-    sighting_date = suppressWarnings(lubridate::ymd(sighting_date)),
-    year  = lubridate::year(sighting_date),
-    month = lubridate::month(sighting_date),
-    
-    group           = str_trim(group),
-    species         = str_trim(species_std),
-    genus           = str_trim(genus),
+    group   = str_trim(group),
+    species = str_trim(species_std),
+    genus   = str_trim(genus),
     species_epithet = str_trim(species_epithet),
     scientific_name = str_trim(scientific_name),
-    dive_site   = str_trim(dive_site_std),
-    region          = str_trim(region),
-    country         = str_to_title(str_trim(country))
+    dive_site = str_trim(dive_site_std),
+    region = str_trim(region),
+    country = str_to_title(str_trim(country)),
+    
+    sighting_date_raw = str_trim(as.character(sighting_date))
   ) %>%
   transmute(
     species, genus, species_epithet, scientific_name, group,
     country, region, dive_site, site_type,
-    sighting_date, year, month,
+    sighting_date_raw,
     n = n_observed
+  ) %>%
+  filter(country != "India", species != "minke whale") %>%
+  mutate(
+    ### patch partial/invalid dates (your rules) ####
+    sighting_date_raw = case_when(
+      is.na(sighting_date_raw) ~ NA_character_,
+      sighting_date_raw == "2024-03-010" ~ "2024-03-10",
+      str_detect(sighting_date_raw, "^\\d{4}$") ~ paste0(sighting_date_raw, "-01-01"),
+      str_detect(sighting_date_raw, "^\\d{4}-\\d{2}$") ~ paste0(sighting_date_raw, "-01"),
+      sighting_date_raw == "04/31/2024" ~ "04/30/2024",
+      sighting_date_raw == "2025-02-29" ~ "2025-02-28",
+      sighting_date_raw == "2023-02-29" ~ "2023-02-28",
+      TRUE ~ sighting_date_raw
+    ),
+    
+    ### parse once ####
+    sighting_date = lubridate::parse_date_time(
+      sighting_date_raw,
+      orders = c("ymd", "mdy", "dmy"),
+      exact = FALSE
+    ) %>% as.Date(),
+    
+    year  = lubridate::year(sighting_date),
+    month = lubridate::month(sighting_date)
   )
-# get rid of a few records
-elasmos <- elasmos %>%
-  filter(
-    country != "India",
-    species != "minke whale"   # minke whale
-  )
-# standardize dates 
+
+### fix formats ####
+
 elasmos <- elasmos %>%
   mutate(
-    sighting_date = parse_date_time(
-      sighting_date,
-      orders = c("ymd", "mdy")
-    ) %>% as.Date()
-  )
-# fix formats
-elasmos <- elasmos %>%
-  mutate(
-    group= factor(group),
+    group = factor(group),
     species = factor(species),
     scientific_name = factor(scientific_name),
     country = factor(country),
     region = factor(region),
     dive_site = factor(dive_site),
     site_type = factor(site_type, levels = c("site", "region_label")),
-    sighting_date = as.Date(sighting_date),
     year = as.integer(year),
     month = as.integer(month),
     n = as.numeric(n)
   )
 
-
-
 write_csv(elasmos, "data_clean/elasmos_sightings.csv")
 
 str(elasmos)
+count(elasmos, country)
 
-# check 
-count(elasmos,country)
