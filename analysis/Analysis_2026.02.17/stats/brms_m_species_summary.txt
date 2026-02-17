@@ -1,0 +1,40 @@
+ Family: negbinomial 
+  Links: mu = log 
+Formula: n_species ~ year_c + country + factor(month) + (1 + year_c | species) + (1 | trip_id) 
+   Data: trip_species_dat (Number of observations: 515) 
+  Draws: 4 chains, each with iter = 6000; warmup = 1500; thin = 1;
+         total post-warmup draws = 18000
+
+Multilevel Hyperparameters:
+~species (Number of levels: 30) 
+                      Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+sd(Intercept)             0.44      0.17     0.15     0.84 1.00     4651     5351
+sd(year_c)                0.07      0.01     0.04     0.10 1.00     4118     8895
+cor(Intercept,year_c)    -0.32      0.29    -0.77     0.33 1.00     3196     4943
+
+~trip_id (Number of levels: 190) 
+              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+sd(Intercept)     0.27      0.07     0.12     0.39 1.00     3701     3200
+
+Regression Coefficients:
+                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+Intercept           1.17      0.19     0.79     1.54 1.00     8868    11422
+year_c             -0.00      0.02    -0.04     0.04 1.00     7724    11299
+countryThailand    -0.38      0.10    -0.59    -0.18 1.00    16957    13981
+factormonth2       -0.03      0.14    -0.31     0.24 1.00    11489    13722
+factormonth3       -0.15      0.14    -0.42     0.12 1.00    11193    13051
+factormonth4       -0.05      0.14    -0.33     0.22 1.00    11719    13319
+factormonth5        0.05      0.32    -0.57     0.67 1.00    19733    15173
+factormonth7        0.51      0.57    -0.61     1.63 1.00    24271    14238
+factormonth9       -0.52      0.73    -1.98     0.90 1.00    30753    13651
+factormonth10       0.10      0.20    -0.31     0.49 1.00    12462    13118
+factormonth11      -0.21      0.15    -0.51     0.09 1.00    11951    13557
+factormonth12      -0.18      0.13    -0.44     0.08 1.00    11006    12783
+
+Further Distributional Parameters:
+      Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+shape     4.97      0.81     3.63     6.78 1.00     8065    11120
+
+Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
+and Tail_ESS are effective sample size measures, and Rhat is the potential
+scale reduction factor on split chains (at convergence, Rhat = 1).

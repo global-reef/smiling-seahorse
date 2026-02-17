@@ -10,7 +10,7 @@ library(posterior)
 library(bayesplot)
 
 options(mc.cores = parallel::detectCores())
-set.seed(123)
+set.seed(42)
 
 # expects from 00_RUN.R:
 # - fits_dir, plots_dir, stats_dir, tables_dir, summ_dir
@@ -52,7 +52,7 @@ m_core <- brm(
   seed = 123,
   file = file.path(model_dir, "m_core")
 )
-
+summary(m_core)
 # save human-readable summaries
 capture.output(summary(m_core), file = file.path(stats_dir, "brms_m_core_summary.txt"))
 
@@ -84,11 +84,11 @@ core_summ <- tibble(
     mean(post_core$mult_thai)
   )
 )
-
 write_csv(core_summ, file.path(tables_dir, "brms_m_core_prob_increase.csv"))
 
 # save fit object
 saveRDS(m_core, file.path(model_dir, "m_core.rds"))
+
 
 ### 04. DECOMPOSITION 1: SHARKS VS RAYS ####
 
@@ -110,7 +110,7 @@ m_group <- brm(
   seed = 123,
   file = file.path(model_dir, "m_group")
 )
-
+summary(m_group)
 capture.output(summary(m_group), file = file.path(stats_dir, "brms_m_group_summary.txt"))
 
 p_ppc_group <- pp_check(m_group, ndraws = 200) +
@@ -153,7 +153,7 @@ m_species <- brm(
   seed = 123,
   file = file.path(model_dir, "m_species")
 )
-
+summary(m_species)
 capture.output(summary(m_species), file = file.path(stats_dir, "brms_m_species_summary.txt"))
 
 p_ppc_species <- pp_check(m_species, ndraws = 200) +
@@ -181,3 +181,8 @@ spp_slopes <- purrr::map_dfr(spp_slope_cols, function(col) {
 write_csv(spp_slopes, file.path(tables_dir, "brms_m_species_species_slopes.csv"))
 
 saveRDS(m_species, file.path(model_dir, "m_species.rds"))
+
+
+summary(m_core)
+summary(m_group)
+summary(m_species)
