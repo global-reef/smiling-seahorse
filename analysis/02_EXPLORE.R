@@ -1,3 +1,6 @@
+### 02_EXPLORE.R ####
+### Purpose: Zuur-style EDA + build modelling datasets; save datasets for modelling
+
 ### 00. SETUP ####
 
 library(tidyverse)
@@ -6,9 +9,30 @@ library(glmmTMB)
 library(mgcv)
 library(DHARMa)
 
-### 01. BUILD TRIP-LEVEL DATASETS ####
+# expects these from 00_RUN.R:
+# - eda_dir, plots_dir, stats_dir, summ_dir (etc.)
+# ensure clean-data directory exists
+dir.create("data_clean", showWarnings = FALSE, recursive = TRUE)
 
-# --- trip-level aggregation (primary modelling unit) ---
+# small helpers for saving plots + tables without cluttering env
+save_plot <- function(p, filename, w = 7, h = 5, dir = eda_dir) {
+  dir.create(dir, showWarnings = FALSE, recursive = TRUE)
+  ggsave(filename = file.path(dir, filename), plot = p, width = w, height = h, dpi = 300)
+  invisible(TRUE)
+}
+
+save_tbl <- function(x, filename, dir = eda_dir) {
+  dir.create(dir, showWarnings = FALSE, recursive = TRUE)
+  write_csv(x, file.path(dir, filename))
+  invisible(TRUE)
+}
+
+### 01. LOAD CLEAN DATA ####
+
+elasmos <- read_csv("data_clean/elasmos_sightings.csv", show_col_types = FALSE)
+
+### 02. BUILD MODELLING DATASETS ####
+
 trip_dat <- elasmos %>%
   group_by(trip_id) %>%
   summarise(
@@ -22,21 +46,18 @@ trip_dat <- elasmos %>%
     .groups = "drop"
   ) %>%
   mutate(
-    # modelling-friendly coding
-    country = relevel(country, ref = "Myanmar"),
+    country = relevel(factor(country), ref = "Myanmar"),
     year_c  = year - 2012
   )
 
-# --- Myanmar-only convenience object for EDA / model shape checks ---
 myan_dat <- trip_dat %>%
   filter(country == "Myanmar")
 
-# --- taxonomic driver datasets (trip × group, trip × species) ---
 trip_group_dat <- elasmos %>%
   group_by(trip_id, year, month, country, region, group) %>%
   summarise(n_group = sum(n_indiv, na.rm = TRUE), .groups = "drop") %>%
   mutate(
-    country = relevel(country, ref = "Myanmar"),
+    country = relevel(factor(country), ref = "Myanmar"),
     year_c  = year - 2012
   )
 
@@ -44,49 +65,49 @@ trip_species_dat <- elasmos %>%
   group_by(trip_id, year, month, country, region, species) %>%
   summarise(n_species = sum(n_indiv, na.rm = TRUE), .groups = "drop") %>%
   mutate(
-    country = relevel(country, ref = "Myanmar"),
+    country = relevel(factor(country), ref = "Myanmar"),
     year_c  = year - 2012
   )
 
-### 02. SANITY CHECKS ####
+### 03. SANITY CHECKS ####
 
-nrow(trip_dat)                      # expected ~190 trips
-any(is.na(trip_dat$n_trip))         # should be FALSE
-summary(trip_dat$n_trip)
+sanity_summary <- trip_dat %>%
+  summarise(
+    n_trips = n(),
+    any_na_n_trip = any(is.na(n_trip)),
+    mean_n = mean(n_trip),
+    var_n  = var(n_trip),
+    max_n  = max(n_trip),
+    months = paste(sort(unique(month)), collapse = ", ")
+  )
 
-# dispersion / tail checks
-mean(trip_dat$n_trip)
-var(trip_dat$n_trip)
-max(trip_dat$n_trip)
+save_tbl(sanity_summary, "sanity_trip_dat.csv", dir = summ_dir)
 
-# confirm months sampled
-sort(unique(trip_dat$month))
+### 04. ZUUR-STYLE EDA ####
 
-### 03. ZUUR-STYLE EDA ####
+## 04A. OUTLIERS IN RESPONSE (Y) ####
 
-## 03A. OUTLIERS IN RESPONSE (Y) ####
-
-# simple boxplot of n_trip
-ggplot(trip_dat, aes(x = "", y = n_trip)) +
+p_box <- ggplot(trip_dat, aes(x = "", y = n_trip)) +
   geom_boxplot() +
   theme_classic() +
   labs(x = NULL, y = "Total individuals per trip (n_trip)")
 
-# identify top 5 extreme trips
-trip_dat %>%
+save_plot(p_box, "01_boxplot_n_trip.png")
+
+top_trips <- trip_dat %>%
   arrange(desc(n_trip)) %>%
-  slice(1:5) %>%
-  select(trip_id, year, month, country, region, n_trip, n_events)
+  slice(1:10)
 
-## 03B. ZERO STRUCTURE (PRESENCE-CONDITIONED) ####
+save_tbl(top_trips, "02_top10_trips_by_n_trip.csv")
 
-# confirm: no zero-trips in dataset by design
-sum(trip_dat$n_trip == 0)
+## 04B. ZERO STRUCTURE (PRESENCE-CONDITIONED) ####
 
-## 03C. RELATIONSHIP BETWEEN Y AND TIME (SHAPE CHECKS) ####
+zero_check <- tibble(n_zero_trips = sum(trip_dat$n_trip == 0))
+save_tbl(zero_check, "03_zero_trip_check.csv")
 
-# both countries: points + yearly mean + LOESS
-ggplot(trip_dat, aes(x = year, y = n_trip)) +
+## 04C. Y VS TIME (SHAPE) ####
+
+p_all <- ggplot(trip_dat, aes(x = year, y = n_trip)) +
   geom_point(alpha = 0.4) +
   stat_summary(fun = mean, geom = "line", colour = "black", size = 1) +
   stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
@@ -94,8 +115,9 @@ ggplot(trip_dat, aes(x = year, y = n_trip)) +
   theme_classic() +
   labs(y = "n_trip")
 
-# Myanmar only: points + yearly mean + LOESS
-ggplot(myan_dat, aes(x = year, y = n_trip)) +
+save_plot(p_all, "04_time_all_year_mean_loess.png", w = 8, h = 5)
+
+p_myan <- ggplot(myan_dat, aes(x = year, y = n_trip)) +
   geom_point(alpha = 0.4) +
   stat_summary(fun = mean, geom = "line", colour = "black", size = 1) +
   stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
@@ -103,58 +125,66 @@ ggplot(myan_dat, aes(x = year, y = n_trip)) +
   theme_classic() +
   labs(y = "n_trip (Myanmar)")
 
-# log-scale visual (helps interpret proportional change)
-ggplot(trip_dat, aes(year, n_trip)) +
+save_plot(p_myan, "05_time_myanmar_year_mean_loess.png", w = 8, h = 5)
+
+p_log <- ggplot(trip_dat, aes(year, n_trip)) +
   geom_point(alpha = 0.4) +
   scale_y_log10() +
   facet_wrap(~country) +
   theme_classic() +
   labs(y = "n_trip (log10 scale)")
 
-# capped visual to see whether curve is dominated by extreme events
-ggplot(trip_dat, aes(year, pmin(n_trip, 30))) +
+save_plot(p_log, "06_time_log10_facet_country.png", w = 8, h = 5)
+
+p_cap <- ggplot(trip_dat, aes(year, pmin(n_trip, 30))) +
   geom_point(alpha = 0.4) +
-  geom_smooth(method = "loess", se = TRUE) +
+  geom_smooth(method = "loess", se = TRUE, colour = "blue") +
   facet_wrap(~country) +
   theme_classic() +
   labs(y = "n_trip capped at 30 (visual only)")
 
-## 03D. REGION REPLICATION (MYANMAR) ####
+save_plot(p_cap, "07_time_capped30_loess_facet_country.png", w = 8, h = 5)
 
-trip_dat %>%
+## 04D. REGION REPLICATION ####
+
+region_counts_myan <- trip_dat %>%
   filter(country == "Myanmar") %>%
   count(region)
 
-## 03E. TIME-STRUCTURE TESTING (LINEAR VS NONLINEAR) ####
+save_tbl(region_counts_myan, "08_region_counts_myanmar.csv")
 
-# linear NB GLMM (Myanmar only)
+## 04E. TIME-STRUCTURE TESTING (MYANMAR) ####
+
 m_lin <- glmmTMB(
   n_trip ~ scale(year) + factor(month) + (1 | region),
   family = nbinom2,
   data = myan_dat
 )
 
-# quadratic NB GLMM (Myanmar only)
 m_quad <- glmmTMB(
   n_trip ~ scale(year) + I(scale(year)^2) + factor(month) + (1 | region),
   family = nbinom2,
   data = myan_dat
 )
 
-# GAM NB (Myanmar only) - used for shape exploration
 m_gam <- gam(
   n_trip ~ s(year, k = 5) + factor(month),
   family = nb(),
   data = myan_dat
 )
 
-AIC(m_lin, m_quad, m_gam)
-summary(m_gam)
+aic_shape <- AIC(m_lin, m_quad, m_gam) %>%
+  as.data.frame() %>%
+  rownames_to_column("model")
 
-## 03F. SEASONALITY CHECKS ####
+save_tbl(aic_shape, "09_time_shape_aic_myanmar.csv")
 
-# do months shift over years (all data)
-trip_dat %>%
+# keep GAM summary as a text artifact (lightweight)
+capture.output(summary(m_gam), file = file.path(stats_dir, "10_m_gam_summary.txt"))
+
+## 04F. SEASONALITY CHECKS ####
+
+month_by_year <- trip_dat %>%
   group_by(year) %>%
   summarise(
     mean_month = mean(month),
@@ -164,14 +194,16 @@ trip_dat %>%
     .groups = "drop"
   )
 
-# Myanmar month effect: boxplot
-ggplot(myan_dat, aes(x = factor(month), y = n_trip)) +
+save_tbl(month_by_year, "11_month_by_year_all.csv")
+
+p_month_box <- ggplot(myan_dat, aes(x = factor(month), y = n_trip)) +
   geom_boxplot() +
   theme_classic() +
   labs(x = "month", y = "n_trip (Myanmar)")
 
-# Myanmar month summary
-myan_dat %>%
+save_plot(p_month_box, "12_month_boxplot_myanmar.png", w = 7, h = 5)
+
+month_summary_myan <- myan_dat %>%
   group_by(month) %>%
   summarise(
     mean_n = mean(n_trip),
@@ -180,23 +212,26 @@ myan_dat %>%
     .groups = "drop"
   )
 
-# month drift by year (Myanmar)
-myan_dat %>%
+save_tbl(month_summary_myan, "13_month_summary_myanmar.csv")
+
+month_drift_myan <- myan_dat %>%
   group_by(year) %>%
   summarise(mean_month = mean(month), n = n(), .groups = "drop")
 
-plot(myan_dat$year, myan_dat$month)
+save_tbl(month_drift_myan, "14_month_drift_myanmar.csv")
 
-## 03G. INTERACTION (COUNTRY) QUICK VISUAL ####
+## 04G. INTERACTION VISUAL ####
 
-ggplot(trip_dat, aes(year, n_trip)) +
+p_int <- ggplot(trip_dat, aes(year, n_trip)) +
   geom_point(alpha = 0.4) +
   geom_smooth(method = "loess", se = TRUE) +
   facet_wrap(~country) +
   theme_classic() +
   labs(y = "n_trip")
 
-### 04. CORE MODEL (FREQUENTIST) ####
+save_plot(p_int, "15_country_loess_facet.png", w = 8, h = 5)
+
+### 05. CORE MODEL (FREQUENTIST) + DIAGNOSTICS ####
 
 m_core <- glmmTMB(
   n_trip ~ year_c * country + factor(month) + (1 | region),
@@ -204,36 +239,33 @@ m_core <- glmmTMB(
   data = trip_dat
 )
 
-summary(m_core)
-
-### 05. DIAGNOSTICS (DHARMa) ####
+capture.output(summary(m_core), file = file.path(stats_dir, "16_m_core_summary.txt"))
 
 sim_res <- simulateResiduals(m_core)
-
+# save DHARMa plot
+png(file.path(stats_dir, "17_DHARMa_m_core.png"), width = 1200, height = 700, res = 150)
 plot(sim_res)
+dev.off()
 
-testDispersion(sim_res)
-testZeroInflation(sim_res)  # expected to flag "zero deficit" due to presence-conditioned dataset
-testOutliers(sim_res)
+disp_test <- testDispersion(sim_res)
+zi_test   <- testZeroInflation(sim_res)
+out_test  <- testOutliers(sim_res)
 
-# residual autocorrelation check 
+# write tests to text
+capture.output(disp_test, file = file.path(stats_dir, "18_DHARMa_dispersion.txt"))
+capture.output(zi_test,   file = file.path(stats_dir, "19_DHARMa_zero_inflation.txt"))
+capture.output(out_test,  file = file.path(stats_dir, "20_DHARMa_outliers.txt"))
+
+# residual autocorrelation
 trip_dat_ord <- trip_dat %>% arrange(ym)
 res <- residuals(m_core, type = "pearson")
-acf(res[order(trip_dat_ord$ym)], na.action = na.pass)
-# no meaningful temporal dependence across trips 
 
+png(file.path(stats_dir, "21_residual_acf.png"), width = 900, height = 700, res = 150)
+acf(res[order(trip_dat_ord$ym)], na.action = na.pass)
+dev.off()
 
 ### 06. SAVE MODELLING DATASETS ####
 
 saveRDS(trip_dat,         "data_clean/trip_dat.rds")
 saveRDS(trip_group_dat,   "data_clean/trip_group_dat.rds")
 saveRDS(trip_species_dat, "data_clean/trip_species_dat.rds")
-
-
-# The data:
-# Are overdispersed counts → NB appropriate.
-# Show a broadly monotonic increase in Myanmar.
-# Do not show strong nonlinear structure requiring GAM as primary.
-# Are not temporally autocorrelated.
-# Are not seasonally confounded with time.
-# Are conditional on presence and interpreted as such.
