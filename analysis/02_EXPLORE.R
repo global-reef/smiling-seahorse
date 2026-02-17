@@ -1,157 +1,239 @@
-### basic exploration: time + space + taxa ####
+### 00. SETUP ####
 
 library(tidyverse)
-library(lubridate)
+library(ggplot2)
+library(glmmTMB)
+library(mgcv)
+library(DHARMa)
 
-## helper: year-month bin
-elasmos <- elasmos %>%
-  mutate(ym = floor_date(sighting_date, "month"))
+### 01. BUILD TRIP-LEVEL DATASETS ####
 
-## 1) overall time series: Myanmar vs Thailand (monthly counts)
-elasmos %>%
-  filter(country %in% c("Myanmar", "Thailand")) %>%
-  count(country, ym, name = "n") %>%
-  ggplot(aes(ym, n)) +
-  geom_line() +
-  geom_smooth(se = TRUE, method = "loess", span = 0.5) +
-  facet_wrap(~country, ncol = 1, scales = "free_y") + coord_cartesian(ylim = c(0, 25)) +
-  labs(x = NULL, y = "Sightings (monthly)", title = "Elasmo sightings over time")
-
-## 2) Myanmar breakdown: Burma Banks vs Mergui vs other (monthly)
-elasmos %>%
-  filter(country == "Myanmar") %>%
-  mutate(
-    my_subregion = case_when(
-      str_detect(str_to_lower(dive_site), "burma banks|burma\\s*banks") ~ "Burma Banks",
-      str_detect(str_to_lower(region), "mergui") ~ "Mergui",
-      TRUE ~ "Other Myanmar"
-    )
+# --- trip-level aggregation (primary modelling unit) ---
+trip_dat <- elasmos %>%
+  group_by(trip_id) %>%
+  summarise(
+    year    = first(year),
+    month   = first(month),
+    ym      = first(ym),
+    country = first(country),
+    region  = first(region),
+    n_trip  = sum(n_indiv, na.rm = TRUE),
+    n_events = n(),
+    .groups = "drop"
   ) %>%
-  count(my_subregion, ym, name = "n") %>%
-  ggplot(aes(ym, n)) +
-  geom_line() +
-  geom_smooth(se = TRUE, method = "loess", span = 0.6) +
-  facet_wrap(~my_subregion, ncol = 1, scales = "free_y") +
-  labs(x = NULL, y = "Sightings (monthly)", title = "Myanmar subregions over time")
-
-## 3) sharks vs rays distribution by country (annual to reduce noise)
-elasmos %>%
-  filter(country %in% c("Myanmar", "Thailand")) %>%
-  mutate(year = year(sighting_date),
-         group2 = case_when(
-           str_detect(str_to_lower(group), "ray") ~ "ray",
-           str_detect(str_to_lower(group), "shark") ~ "shark",
-           TRUE ~ "other"
-         )) %>%
-  count(country, year, group2, name = "n") %>%
-  ggplot(aes(year, n)) +
-  geom_line() +
-  geom_smooth(se = TRUE, method = "loess", span = 0.8) +
-  facet_grid(group2 ~ country, scales = "free_y") + coord_cartesian(ylim = c(0, 30)) +
-  labs(x = NULL, y = "Sightings (annual)", title = "Sharks vs rays through time")
-
-## 4) top species in Myanmar, and their time series (annual)
-top_spp_myanmar <- elasmos %>%
-  filter(country == "Myanmar") %>%
-  count(species, sort = TRUE) %>%
-  slice_head(n = 12) %>%
-  pull(species)
-
-elasmos %>%
-  filter(country == "Myanmar", species %in% top_spp_myanmar) %>%
-  mutate(year = year(sighting_date)) %>%
-  count(species, year, name = "n") %>%
-  ggplot(aes(year, n)) +
-  geom_line() +
-  geom_smooth(se = FALSE, method = "loess", span = 1) +
-  facet_wrap(~species, scales = "free_y") +
-  labs(x = NULL, y = "Sightings (annual)", title = "Top Myanmar species trends")
-
-### 5) top species time series: Myanmar vs Thailand ####
-
-top_spp <- elasmos %>%
-  filter(country == "Myanmar") %>%
-  count(species, sort = TRUE) %>%
-  slice_head(n = 12) %>%
-  pull(species)
-
-elasmos %>%
-  filter(country %in% c("Myanmar", "Thailand"),
-         species %in% top_spp) %>%
-  mutate(year = lubridate::year(sighting_date)) %>%
-  count(country, species, year, name = "n") %>%
-  ggplot(aes(year, n, colour = country)) +
-  geom_point(alpha = 0.6, size = 1.8) +
-  geom_smooth(se = FALSE, method = "loess", span = 1) +
-  facet_wrap(~species, scales = "free_y") +
-  scale_colour_manual(
-    values = c("Myanmar" = "lightblue", "Thailand" = "orange")
-  ) +
-  labs(
-    x = NULL,
-    y = "Sightings (annual)",
-    colour = NULL,
-    title = "Top Myanmar species: annual sightings (with Thailand comparison)"
+  mutate(
+    # modelling-friendly coding
+    country = relevel(country, ref = "Myanmar"),
+    year_c  = year - 2012
   )
 
+# --- Myanmar-only convenience object for EDA / model shape checks ---
+myan_dat <- trip_dat %>%
+  filter(country == "Myanmar")
 
-#### check effort and distributions ##### 
-# effort 
-elasmos %>%
-  count(country, year) %>%
-  ggplot(aes(year, n, colour = country)) +
-  geom_line() +
-  geom_smooth(se = FALSE) +
-  labs(x = NULL, y = "Total sightings")
-
-# spatial distr
-elasmos %>%
+# --- taxonomic driver datasets (trip × group, trip × species) ---
+trip_group_dat <- elasmos %>%
+  group_by(trip_id, year, month, country, region, group) %>%
+  summarise(n_group = sum(n_indiv, na.rm = TRUE), .groups = "drop") %>%
   mutate(
-    subregion = case_when(
-      str_detect(str_to_lower(dive_site), "burma") ~ "Burma Banks",
-      country == "Myanmar" ~ "Mergui",
-      TRUE ~ "Thailand"
-    )
-  ) %>%
-  count(subregion, species) %>%
-  group_by(subregion) %>%
-  mutate(prop = n / sum(n)) %>%
-  ggplot(aes(prop, species, fill = subregion)) +
-  geom_col(position = "dodge") +
-  labs(x = "Proportion of sightings", y = NULL)
+    country = relevel(country, ref = "Myanmar"),
+    year_c  = year - 2012
+  )
 
-# shark vs rays by country 
-elasmos %>%
-  count(country, group) %>%
-  group_by(country) %>%
-  mutate(prop = n / sum(n)) %>%
-  ggplot(aes(country, prop, fill = group)) +
-  geom_col() +
-  labs(y = "Proportion of sightings")
+trip_species_dat <- elasmos %>%
+  group_by(trip_id, year, month, country, region, species) %>%
+  summarise(n_species = sum(n_indiv, na.rm = TRUE), .groups = "drop") %>%
+  mutate(
+    country = relevel(country, ref = "Myanmar"),
+    year_c  = year - 2012
+  )
 
-# species turnover (myanmar only) 
-elasmos %>%
+### 02. SANITY CHECKS ####
+
+nrow(trip_dat)                      # expected ~190 trips
+any(is.na(trip_dat$n_trip))         # should be FALSE
+summary(trip_dat$n_trip)
+
+# dispersion / tail checks
+mean(trip_dat$n_trip)
+var(trip_dat$n_trip)
+max(trip_dat$n_trip)
+
+# confirm months sampled
+sort(unique(trip_dat$month))
+
+### 03. ZUUR-STYLE EDA ####
+
+## 03A. OUTLIERS IN RESPONSE (Y) ####
+
+# simple boxplot of n_trip
+ggplot(trip_dat, aes(x = "", y = n_trip)) +
+  geom_boxplot() +
+  theme_classic() +
+  labs(x = NULL, y = "Total individuals per trip (n_trip)")
+
+# identify top 5 extreme trips
+trip_dat %>%
+  arrange(desc(n_trip)) %>%
+  slice(1:5) %>%
+  select(trip_id, year, month, country, region, n_trip, n_events)
+
+## 03B. ZERO STRUCTURE (PRESENCE-CONDITIONED) ####
+
+# confirm: no zero-trips in dataset by design
+sum(trip_dat$n_trip == 0)
+
+## 03C. RELATIONSHIP BETWEEN Y AND TIME (SHAPE CHECKS) ####
+
+# both countries: points + yearly mean + LOESS
+ggplot(trip_dat, aes(x = year, y = n_trip)) +
+  geom_point(alpha = 0.4) +
+  stat_summary(fun = mean, geom = "line", colour = "black", size = 1) +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  geom_smooth(method = "loess", se = TRUE) +
+  theme_classic() +
+  labs(y = "n_trip")
+
+# Myanmar only: points + yearly mean + LOESS
+ggplot(myan_dat, aes(x = year, y = n_trip)) +
+  geom_point(alpha = 0.4) +
+  stat_summary(fun = mean, geom = "line", colour = "black", size = 1) +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  geom_smooth(method = "loess", se = TRUE, colour = "blue") +
+  theme_classic() +
+  labs(y = "n_trip (Myanmar)")
+
+# log-scale visual (helps interpret proportional change)
+ggplot(trip_dat, aes(year, n_trip)) +
+  geom_point(alpha = 0.4) +
+  scale_y_log10() +
+  facet_wrap(~country) +
+  theme_classic() +
+  labs(y = "n_trip (log10 scale)")
+
+# capped visual to see whether curve is dominated by extreme events
+ggplot(trip_dat, aes(year, pmin(n_trip, 30))) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "loess", se = TRUE) +
+  facet_wrap(~country) +
+  theme_classic() +
+  labs(y = "n_trip capped at 30 (visual only)")
+
+## 03D. REGION REPLICATION (MYANMAR) ####
+
+trip_dat %>%
   filter(country == "Myanmar") %>%
-  mutate(year = year(sighting_date)) %>%
-  count(year, species) %>%
-  count(year, name = "species_richness") %>%
-  ggplot(aes(year, species_richness)) +
-  geom_line() +
-  geom_point() +
-  labs(y = "Species richness")
+  count(region)
 
-# species ranges
-elasmos %>%
-  count(species, dive_site) %>%
-  count(species, name = "n_sites") %>%
-  arrange(desc(n_sites)) %>%
-  slice_head(n = 15)
+## 03E. TIME-STRUCTURE TESTING (LINEAR VS NONLINEAR) ####
 
-# seasonality 
-elasmos %>%
-  mutate(month = month(sighting_date, label = TRUE)) %>%
-  count(country, month) %>%
-  ggplot(aes(month, n, fill = country)) +
-  geom_col(position = "dodge") +
-  labs(y = "Sightings")
+# linear NB GLMM (Myanmar only)
+m_lin <- glmmTMB(
+  n_trip ~ scale(year) + factor(month) + (1 | region),
+  family = nbinom2,
+  data = myan_dat
+)
 
+# quadratic NB GLMM (Myanmar only)
+m_quad <- glmmTMB(
+  n_trip ~ scale(year) + I(scale(year)^2) + factor(month) + (1 | region),
+  family = nbinom2,
+  data = myan_dat
+)
+
+# GAM NB (Myanmar only) - used for shape exploration
+m_gam <- gam(
+  n_trip ~ s(year, k = 5) + factor(month),
+  family = nb(),
+  data = myan_dat
+)
+
+AIC(m_lin, m_quad, m_gam)
+summary(m_gam)
+
+## 03F. SEASONALITY CHECKS ####
+
+# do months shift over years (all data)
+trip_dat %>%
+  group_by(year) %>%
+  summarise(
+    mean_month = mean(month),
+    min_month  = min(month),
+    max_month  = max(month),
+    n = n(),
+    .groups = "drop"
+  )
+
+# Myanmar month effect: boxplot
+ggplot(myan_dat, aes(x = factor(month), y = n_trip)) +
+  geom_boxplot() +
+  theme_classic() +
+  labs(x = "month", y = "n_trip (Myanmar)")
+
+# Myanmar month summary
+myan_dat %>%
+  group_by(month) %>%
+  summarise(
+    mean_n = mean(n_trip),
+    sd_n   = sd(n_trip),
+    n      = n(),
+    .groups = "drop"
+  )
+
+# month drift by year (Myanmar)
+myan_dat %>%
+  group_by(year) %>%
+  summarise(mean_month = mean(month), n = n(), .groups = "drop")
+
+plot(myan_dat$year, myan_dat$month)
+
+## 03G. INTERACTION (COUNTRY) QUICK VISUAL ####
+
+ggplot(trip_dat, aes(year, n_trip)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "loess", se = TRUE) +
+  facet_wrap(~country) +
+  theme_classic() +
+  labs(y = "n_trip")
+
+### 04. CORE MODEL (FREQUENTIST) ####
+
+m_core <- glmmTMB(
+  n_trip ~ year_c * country + factor(month) + (1 | region),
+  family = nbinom2,
+  data = trip_dat
+)
+
+summary(m_core)
+
+### 05. DIAGNOSTICS (DHARMa) ####
+
+sim_res <- simulateResiduals(m_core)
+
+plot(sim_res)
+
+testDispersion(sim_res)
+testZeroInflation(sim_res)  # expected to flag "zero deficit" due to presence-conditioned dataset
+testOutliers(sim_res)
+
+# residual autocorrelation check 
+trip_dat_ord <- trip_dat %>% arrange(ym)
+res <- residuals(m_core, type = "pearson")
+acf(res[order(trip_dat_ord$ym)], na.action = na.pass)
+# no meaningful temporal dependence across trips 
+
+
+### 06. SAVE MODELLING DATASETS ####
+
+saveRDS(trip_dat,         "data_clean/trip_dat.rds")
+saveRDS(trip_group_dat,   "data_clean/trip_group_dat.rds")
+saveRDS(trip_species_dat, "data_clean/trip_species_dat.rds")
+
+
+# The data:
+# Are overdispersed counts → NB appropriate.
+# Show a broadly monotonic increase in Myanmar.
+# Do not show strong nonlinear structure requiring GAM as primary.
+# Are not temporally autocorrelated.
+# Are not seasonally confounded with time.
+# Are conditional on presence and interpreted as such.

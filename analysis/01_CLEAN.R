@@ -179,15 +179,19 @@ elasmos <- sightings_valid %>%
     sighting_date_raw = str_trim(as.character(sighting_date))
   ) %>%
   transmute(
+    trip_id = url,   
     species, genus, species_epithet, scientific_name, group,
     country, region, dive_site, site_type,
     sighting_date_raw,
-    n = n_observed
+    n_indiv = n_observed
   ) %>%
   filter(country != "India", species != "minke whale") %>%
   mutate(
     ### patch partial/invalid dates (your rules) ####
     sighting_date_raw = case_when(
+      # NEW: trip-level overrides
+      trip_id == "https://www.thesmilingseahorse.com/blog/trip-report-north-and-south-andaman-christmas-cruise" ~ "2023-12-19",
+      trip_id == "https://www.thesmilingseahorse.com/blog/why-we-love-burma-have-a-look-below" ~ "2019-03-03",
       is.na(sighting_date_raw) ~ NA_character_,
       sighting_date_raw == "2024-03-010" ~ "2024-03-10",
       str_detect(sighting_date_raw, "^\\d{4}$") ~ paste0(sighting_date_raw, "-01-01"),
@@ -206,24 +210,71 @@ elasmos <- sightings_valid %>%
     ) %>% as.Date(),
     
     year  = lubridate::year(sighting_date),
-    month = lubridate::month(sighting_date)
+    month = lubridate::month(sighting_date),
+    ym    = as.Date(sprintf("%d-%02d-01", year, month))
   )
+
 
 ### fix formats ####
 
 elasmos <- elasmos %>%
   mutate(
+    trip_id = factor(trip_id),
     group = factor(group),
     species = factor(species),
     scientific_name = factor(scientific_name),
     country = factor(country),
     region = factor(region),
     dive_site = factor(dive_site),
-    site_type = factor(site_type, levels = c("site", "region_label")),
+    site_type = factor(site_type, levels = c("site", "region")),
     year = as.integer(year),
     month = as.integer(month),
-    n = as.numeric(n)
+    n_indiv = as.numeric(n_indiv)
   )
+
+
+
+# fix a couple bad dates 
+elasmos %>%
+  group_by(trip_id) %>%
+  summarise(min_date = min(sighting_date, na.rm = TRUE),
+            max_date = max(sighting_date, na.rm = TRUE),
+            span_days = as.numeric(max_date - min_date)) %>%
+  arrange(desc(span_days)) %>%
+  slice(1:20)
+
+trip_2023 <- "https://www.thesmilingseahorse.com/blog/9th-to-17th-of-december-2023-mergui-archipelago-and-burma-banks-a-dive-adventure"
+
+
+elasmos <- elasmos %>%
+  mutate(
+    sighting_date = if_else(
+      trip_id == trip_2023,
+      make_date(2023, month(sighting_date), day(sighting_date)),
+      sighting_date
+    )
+  ) %>%
+  mutate(
+    year  = year(sighting_date),
+    month = month(sighting_date),
+    ym    = as.Date(sprintf("%d-%02d-01", year, month))
+  )
+
+bad_trip_2 <- "https://www.thesmilingseahorse.com/blog/-blotched-stingray-vs-nurse-shark"
+
+elasmos <- elasmos %>%
+  mutate(
+    sighting_date = if_else(
+      trip_id == bad_trip_2,
+      make_date(2012, month(sighting_date), day(sighting_date)),
+      sighting_date
+    ),
+    year  = year(sighting_date),
+    month = month(sighting_date),
+    ym    = as.Date(sprintf("%d-%02d-01", year, month))
+  )
+
+
 
 write_csv(elasmos, "data_clean/elasmos_sightings.csv")
 
