@@ -55,6 +55,9 @@ Supporting directories:
 -   `reports/` -- Summary outputs
 -   `outputs/` -- Model objects and posterior summaries
 
+
+
+
 ------------------------------------------------------------------------
 
 ## 🧠 Modelling Framework
@@ -77,20 +80,11 @@ Models incorporate partial pooling across:
 
 ## 🧪 Example Output
 
-  ------------------------------------------------------------------------
-  scientific_name              sighting_date     dive_site     excerpt
-  ---------------------------- ----------------- ------------- -----------
-  Rhincodon typus              2025-01-23        Roe Bank      "...we
-                                                               spotted a
-                                                               whale
-                                                               shark..."
+| scientific_name      | sighting_date | dive_site | excerpt                                      |
+|----------------------|--------------|-----------|----------------------------------------------|
+| *Rhincodon typus*    | 2025-01-23   | Roe Bank  | "...we spotted a whale shark..."             |
+| *Mobula birostris*   | 2025-01-24   | Roe Bank  | "...an oceanic manta glided by..."           |
 
-  Mobula birostris             2025-01-24        Roe Bank      "...an
-                                                               oceanic
-                                                               manta
-                                                               glided
-                                                               by..."
-  ------------------------------------------------------------------------
 
 ------------------------------------------------------------------------
 
