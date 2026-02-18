@@ -101,6 +101,11 @@ source(file.path(proj_dir, "02_EXPLORE.R"))
 # modelling (Bayesian brms workflow)
 source(file.path(proj_dir, "03_MODEL.R"))
 
+
+# species-specific slopes 
+source(file.path(proj_dir, "04_SPP_MODELS.R"))
+
+
 ### 04. END ####
 
 message("Run complete: ", analysis_date)

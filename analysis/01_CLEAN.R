@@ -134,6 +134,10 @@ elasmos <- sightings_valid %>%
     genus           = iconv(genus, from = "", to = "UTF-8", sub = ""),
     species_epithet = iconv(species_epithet, from = "", to = "UTF-8", sub = ""),
     scientific_name = iconv(scientific_name, from = "", to = "UTF-8", sub = ""),
+    scientific_name = case_when(
+      scientific_name == "acroteriovatus.spp" ~ "Acroteriobatus.spp",
+      TRUE ~ scientific_name
+    ),
     dive_site_std   = iconv(dive_site_std, from = "", to = "UTF-8", sub = ""),
     region          = iconv(region, from = "", to = "UTF-8", sub = ""),
     country         = iconv(country, from = "", to = "UTF-8", sub = ""),
