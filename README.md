@@ -56,11 +56,35 @@ Supporting directories:
 -   `outputs/` -- Model objects and posterior summaries
 
 
+------------------------------------------------------------------------
 
+## 📁 Repository Structure
+
+```
+smiling-seahorse/
+├── analysis.Rproj
+├── README.md
+├── validator_app.py
+├── requirements.txt
+├── data/
+├── notebooks/
+└── analysis/
+    ├── 00_RUN.R
+    ├── 01_CLEAN.R
+    ├── 02_EXPLORE.R
+    ├── 03_MODEL.R
+    ├── 04_SPP_MODELS.R
+    ├── data_raw/
+    ├── data_clean/
+    ├── figures/
+    ├── reports/
+    ├── outputs/
+    └── Analysis_YYYY_MM_DD/
+```
 
 ------------------------------------------------------------------------
 
-## 🧠 Modelling Framework
+### 🧠 Modelling Framework
 
 The analysis uses Bayesian negative binomial hierarchical models (via
 `brms`) to evaluate:
