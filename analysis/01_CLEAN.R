@@ -8,6 +8,14 @@ library(janitor)
 library(stringr)
 library(lubridate)
 
+# expects: analysis_dir from 00_RUN.R
+stopifnot(exists("analysis_dir"))
+stopifnot(dir.exists(analysis_dir))
+
+old_wd <- getwd()
+setwd(analysis_dir)
+on.exit(setwd(old_wd), add = TRUE)
+
 # expects these from 00_RUN.R:
 # - output_dir, eda_dir, summ_dir, tables_dir (etc.)
 # minimal assumption: data_clean/ exists
