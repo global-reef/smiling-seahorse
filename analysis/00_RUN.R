@@ -6,14 +6,14 @@
 library(tidyverse)
 library(ggplot2)
 
-# ---- set analysis date (update each run) ----
-analysis_date <- format(Sys.Date(), "%Y_%m_%d")
-
-# ---- project root (assumes you run this from the project folder) ----
+# project root (repo root)
 proj_dir <- getwd()
 
-# ---- output folder structure ----
-output_dir  <- file.path(proj_dir, paste0("Analysis_", analysis_date))
+# analysis folder is the working base
+analysis_dir <- file.path(proj_dir, "analysis")
+
+# outputs should live inside analysis/
+output_dir  <- file.path(analysis_dir, paste0("Analysis_", analysis_date))
 fits_dir    <- file.path(output_dir, "fits")
 plots_dir   <- file.path(output_dir, "plots")
 stats_dir   <- file.path(output_dir, "stats")
@@ -28,6 +28,17 @@ dir.create(stats_dir,  showWarnings = FALSE, recursive = TRUE)
 dir.create(summ_dir,   showWarnings = FALSE, recursive = TRUE)
 dir.create(eda_dir,    showWarnings = FALSE, recursive = TRUE)
 dir.create(tables_dir, showWarnings = FALSE, recursive = TRUE)
+
+writeLines(
+  c(
+    paste0("analysis_date: ", analysis_date),
+    paste0("proj_dir: ", proj_dir),
+    paste0("analysis_dir: ", analysis_dir),
+    paste0("output_dir: ", output_dir),
+    paste0("run_time: ", Sys.time())
+  ),
+  con = file.path(output_dir, "run_log.txt")
+)
 
 # ---- optional: write a run log ----
 writeLines(
@@ -92,18 +103,17 @@ brms_fixef_export <- function(fit, model_name, out_dir = tables_dir, sigfigs = 3
 # - Keep scripts writing outputs into these folders rather than the project root.
 
 # cleaning 
-source(file.path(proj_dir, "01_CLEAN.R"))
-
+source(file.path(analysis_dir, "01_CLEAN.R"))
 
 # EDA
-source(file.path(proj_dir, "02_EXPLORE.R"))
+source(file.path(analysis_dir, "02_EXPLORE.R"))
 
 # modelling (Bayesian brms workflow)
-source(file.path(proj_dir, "03_MODEL.R"))
+source(file.path(analysis_dir, "03_MODEL.R"))
 
 
 # species-specific slopes 
-source(file.path(proj_dir, "04_SPP_MODELS.R"))
+source(file.path(analysis_dir, "04_SPP_MODELS.R"))
 
 
 ### 04. END ####
