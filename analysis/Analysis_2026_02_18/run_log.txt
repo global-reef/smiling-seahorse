@@ -1,0 +1,4 @@
+analysis_date: 2026_02_18
+proj_dir: /Users/scarletttaylor/Documents/1_GLOBAL REEF/0_PROJECTS/C06 - Elasmos in Myanmar/smiling-seahorse/analysis
+output_dir: /Users/scarletttaylor/Documents/1_GLOBAL REEF/0_PROJECTS/C06 - Elasmos in Myanmar/smiling-seahorse/analysis/Analysis_2026_02_18
+run_time: 2026-02-18 09:41:03.206381

@@ -7,7 +7,7 @@ library(tidyverse)
 library(ggplot2)
 
 # ---- set analysis date (update each run) ----
-analysis_date <- "2026.02.17"  # update each run !!
+analysis_date <- format(Sys.Date(), "%Y_%m_%d")
 
 # ---- project root (assumes you run this from the project folder) ----
 proj_dir <- getwd()

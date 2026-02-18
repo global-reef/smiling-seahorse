@@ -136,13 +136,13 @@ saveRDS(m_group, file.path(model_dir, "m_group.rds"))
 
 trip_species_dat <- trip_species_dat %>%
   mutate(
-    species = factor(species),
+    scientific_name = factor(scientific_name),
     country = relevel(factor(country), ref = "Myanmar")
   )
 
 m_species <- brm(
   n_species ~ year_c + country + factor(month) +
-    (1 + year_c | species) +
+    (1 + year_c | scientific_name) +
     (1 | trip_id),
   data = trip_species_dat,
   family = negbinomial(link = "log"),
@@ -153,30 +153,38 @@ m_species <- brm(
   seed = 123,
   file = file.path(model_dir, "m_species")
 )
+
 summary(m_species)
-capture.output(summary(m_species), file = file.path(stats_dir, "brms_m_species_summary.txt"))
+capture.output(summary(m_species),
+               file = file.path(stats_dir, "brms_m_species_summary.txt"))
 
 p_ppc_species <- pp_check(m_species, ndraws = 200) +
   ggtitle("brms m_species: PPC (counts)")
-ggsave(file.path(plots_dir, "brms_m_species_ppc.png"), p_ppc_species, width = 8, height = 5, dpi = 300)
+ggsave(file.path(plots_dir, "brms_m_species_ppc.png"),
+       p_ppc_species, width = 8, height = 5, dpi = 300)
 
-# species-specific slope summaries from posterior draws
+# scientific_name-specific slope summaries from posterior draws
 draws <- as_draws_df(m_species)
-spp_slope_cols <- grep("^r_species\\[.*,year_c\\]$", names(draws), value = TRUE)
+
+spp_slope_cols <- grep("^r_scientific_name\\[.*,year_c\\]$", names(draws), value = TRUE)
 
 spp_slopes <- purrr::map_dfr(spp_slope_cols, function(col) {
-  spp <- sub("^r_species\\[(.*),year_c\\]$", "\\1", col)
-  slope <- draws$b_year_c + draws[[col]]
+  spp <- sub("^r_scientific_name\\[(.*),year_c\\]$", "\\1", col)
+  
+  slope <- draws$b_year_c + draws[[col]]  # species-specific (pooled across countries)
+  
   tibble(
-    species = spp,
+    scientific_name = spp,
     slope_mean = mean(slope),
     slope_q2.5 = quantile(slope, 0.025),
     slope_q97.5 = quantile(slope, 0.975),
     prob_gt0 = mean(slope > 0),
-    annual_multiplier_mean = mean(exp(slope))
+    annual_multiplier_mean = mean(exp(slope)),
+    percent_change_mean = (annual_multiplier_mean - 1) * 100
   )
 }) %>%
   arrange(desc(prob_gt0))
+
 
 write_csv(spp_slopes, file.path(tables_dir, "brms_m_species_species_slopes.csv"))
 

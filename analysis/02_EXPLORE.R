@@ -62,7 +62,7 @@ trip_group_dat <- elasmos %>%
   )
 
 trip_species_dat <- elasmos %>%
-  group_by(trip_id, year, month, country, region, species) %>%
+  group_by(trip_id, year, month, country, region, species, scientific_name) %>%
   summarise(n_species = sum(n_indiv, na.rm = TRUE), .groups = "drop") %>%
   mutate(
     country = relevel(factor(country), ref = "Myanmar"),
