@@ -12,19 +12,22 @@ library(lubridate)
 stopifnot(exists("analysis_dir"))
 stopifnot(dir.exists(analysis_dir))
 
-old_wd <- getwd()
-setwd(analysis_dir)
-on.exit(setwd(old_wd), add = TRUE)
 
 # expects these from 00_RUN.R:
 # - output_dir, eda_dir, summ_dir, tables_dir (etc.)
-# minimal assumption: data_clean/ exists
-dir.create("data_clean", showWarnings = FALSE, recursive = TRUE)
+# always write inside analysis/
+data_raw_dir   <- file.path(analysis_dir, "data_raw")
+data_clean_dir <- file.path(analysis_dir, "data_clean")
+
+dir.create(data_raw_dir,   showWarnings = FALSE, recursive = TRUE)
+dir.create(data_clean_dir, showWarnings = FALSE, recursive = TRUE)
+
 
 ### 01. LOAD DATA ####
 
-sightings <- read_csv("data_raw/validated_sightings.csv") %>%
+sightings <- read_csv(file.path(data_raw_dir, "validated_sightings.csv")) %>%
   clean_names()
+
 
 ### 02. FILTER VALID SIGHTINGS ####
 
@@ -67,10 +70,11 @@ site_lookup <- sites_raw %>%
   )
 
 # draft lookup for manual edit
-write_csv(site_lookup, "data_clean/site_lookup_draft.csv")
+write_csv(site_lookup, file.path(data_clean_dir, "site_lookup_draft.csv"))
+
 
 # join edited lookup
-site_lookup <- read_csv("data_clean/site_lookup_edited.csv") %>%
+site_lookup <- read_csv(file.path(data_clean_dir, "site_lookup_edited.csv")) %>%
   distinct(dive_site, .keep_all = TRUE)
 
 sightings_valid <- sightings_valid %>%
@@ -94,11 +98,11 @@ species_lookup <- species_raw %>%
   )
 
 # draft lookup for manual edit
-write_csv(species_lookup, "data_clean/species_lookup_draft.csv")
+write_csv(species_lookup, file.path(data_clean_dir, "species_lookup_draft.csv"))
 
 # load + clean edited lookup
 species_lookup <- read_csv(
-  "data_clean/species_lookup_edited.csv",
+  file.path(data_clean_dir, "species_lookup_edited.csv"),
   locale = locale(encoding = "UTF-8"),
   col_types = cols(
     species = col_character(),
@@ -132,7 +136,7 @@ sightings_valid <- sightings_valid %>%
 
 ### 06. SAVE CLEANED VALIDATED SIGHTINGS ####
 
-write_csv(sightings_valid, "data_clean/validated_sightings_clean.csv")
+write_csv(sightings_valid, file.path(data_clean_dir, "validated_sightings_clean.csv"))
 
 ### 07. BUILD FINAL ELASMOS DATASET ####
 
@@ -229,7 +233,8 @@ elasmos <- elasmos %>%
 
 ### 09. SAVE FINAL ELASMOS ####
 
-write_csv(elasmos, "data_clean/elasmos_sightings.csv")
+write_csv(elasmos, file.path(data_clean_dir, "elasmos_sightings.csv"))
+
 
 # optional: save a compact summary for logs
 elasmos_summary <- elasmos %>%

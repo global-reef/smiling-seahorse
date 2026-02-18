@@ -13,18 +13,25 @@ library(brms)
 
 options(dplyr.summarise.inform = FALSE)
 
+# expects from 00_RUN.R:
+# - output_dir, fits_dir
+stopifnot(exists("output_dir"))
+stopifnot(dir.exists(output_dir))
+stopifnot(exists("fits_dir"))
+stopifnot(dir.exists(fits_dir))
+
 out_spp <- file.path(output_dir, "spp-specific")
 dir.create(out_spp, recursive = TRUE, showWarnings = FALSE)
 
 ### load model ####
 
-# option A: model already in environment
-# m_species <- m_species
-
-# option B: load from disk
-# m_species <- readRDS(file.path(model_dir, "m_species_scientific_name.rds"))
-
-stopifnot(exists("m_species"))
+# if not already in environment, load from disk
+if (!exists("m_species")) {
+  model_dir <- file.path(fits_dir, "brms")
+  m_path <- file.path(model_dir, "m_species.rds")
+  stopifnot(file.exists(m_path))
+  m_species <- readRDS(m_path)
+}
 
 ### extract scientific_name-specific year slopes ####
 # expected model:

@@ -11,8 +11,13 @@ library(DHARMa)
 
 # expects these from 00_RUN.R:
 # - eda_dir, plots_dir, stats_dir, summ_dir (etc.)
-# ensure clean-data directory exists
-dir.create("data_clean", showWarnings = FALSE, recursive = TRUE)
+# expects: analysis_dir from 00_RUN.R
+stopifnot(exists("analysis_dir"))
+stopifnot(dir.exists(analysis_dir))
+
+data_clean_dir <- file.path(analysis_dir, "data_clean")
+dir.create(data_clean_dir, showWarnings = FALSE, recursive = TRUE)
+
 
 # small helpers for saving plots + tables without cluttering env
 save_plot <- function(p, filename, w = 7, h = 5, dir = eda_dir) {
@@ -29,7 +34,8 @@ save_tbl <- function(x, filename, dir = eda_dir) {
 
 ### 01. LOAD CLEAN DATA ####
 
-elasmos <- read_csv("data_clean/elasmos_sightings.csv", show_col_types = FALSE)
+elasmos <- read_csv(file.path(data_clean_dir, "elasmos_sightings.csv"), show_col_types = FALSE)
+
 
 ### 02. BUILD MODELLING DATASETS ####
 
@@ -265,7 +271,7 @@ acf(res[order(trip_dat_ord$ym)], na.action = na.pass)
 dev.off()
 
 ### 06. SAVE MODELLING DATASETS ####
+saveRDS(trip_dat,         file.path(data_clean_dir, "trip_dat.rds"))
+saveRDS(trip_group_dat,   file.path(data_clean_dir, "trip_group_dat.rds"))
+saveRDS(trip_species_dat, file.path(data_clean_dir, "trip_species_dat.rds"))
 
-saveRDS(trip_dat,         "data_clean/trip_dat.rds")
-saveRDS(trip_group_dat,   "data_clean/trip_group_dat.rds")
-saveRDS(trip_species_dat, "data_clean/trip_species_dat.rds")

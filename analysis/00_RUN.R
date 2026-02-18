@@ -6,14 +6,19 @@
 library(tidyverse)
 library(ggplot2)
 
-# project root (repo root)
-proj_dir <- getwd()
+analysis_date <- format(Sys.Date(), "%Y_%m_%d")
 
-# analysis folder is the working base
-analysis_dir <- file.path(proj_dir, "analysis")
+# fixed relative paths (assumes repo root is the working directory)
+wd0 <- getwd()
+if (basename(wd0) == "analysis") setwd("..")
 
-# outputs should live inside analysis/
+analysis_dir <- "analysis"
+dir.create(analysis_dir, showWarnings = FALSE, recursive = TRUE)
+
+# outputs live inside analysis/
 output_dir  <- file.path(analysis_dir, paste0("Analysis_", analysis_date))
+dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
+
 fits_dir    <- file.path(output_dir, "fits")
 plots_dir   <- file.path(output_dir, "plots")
 stats_dir   <- file.path(output_dir, "stats")
@@ -21,7 +26,6 @@ summ_dir    <- file.path(output_dir, "summaries")
 eda_dir     <- file.path(output_dir, "eda")
 tables_dir  <- file.path(output_dir, "tables")
 
-dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 dir.create(fits_dir,   showWarnings = FALSE, recursive = TRUE)
 dir.create(plots_dir,  showWarnings = FALSE, recursive = TRUE)
 dir.create(stats_dir,  showWarnings = FALSE, recursive = TRUE)
@@ -29,23 +33,13 @@ dir.create(summ_dir,   showWarnings = FALSE, recursive = TRUE)
 dir.create(eda_dir,    showWarnings = FALSE, recursive = TRUE)
 dir.create(tables_dir, showWarnings = FALSE, recursive = TRUE)
 
+# run log
 writeLines(
   c(
     paste0("analysis_date: ", analysis_date),
-    paste0("proj_dir: ", proj_dir),
-    paste0("analysis_dir: ", analysis_dir),
-    paste0("output_dir: ", output_dir),
-    paste0("run_time: ", Sys.time())
-  ),
-  con = file.path(output_dir, "run_log.txt")
-)
-
-# ---- optional: write a run log ----
-writeLines(
-  c(
-    paste0("analysis_date: ", analysis_date),
-    paste0("proj_dir: ", proj_dir),
-    paste0("output_dir: ", output_dir),
+    paste0("wd: ", normalizePath(getwd(), winslash = "/")),
+    paste0("analysis_dir: ", normalizePath(analysis_dir, winslash = "/", mustWork = FALSE)),
+    paste0("output_dir: ", normalizePath(output_dir, winslash = "/", mustWork = FALSE)),
     paste0("run_time: ", Sys.time())
   ),
   con = file.path(output_dir, "run_log.txt")
@@ -64,24 +58,20 @@ theme_clean <- theme_minimal(base_family = "Arial") +
     panel.grid = element_blank()
   )
 
-# palette placeholders (edit if you want later)
-# e.g., country colours or group colours if you decide to standardize plots
 country_cols <- c("Myanmar" = "#007A87", "Thailand" = "#66BFA6")
-elasmo_cols <- c("shark" = "#007A87", "ray" = "#66BFA6")
+elasmo_cols  <- c("shark" = "#007A87", "ray" = "#66BFA6")
 
 ### 02. HELPERS ####
 
 format_p <- function(p) ifelse(p < 0.001, "<0.001",
                                formatC(p, format = "f", digits = 3))
 
-# save a small object to a known output location
 save_obj <- function(x, filename, dir = summ_dir) {
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
   saveRDS(x, file.path(dir, filename))
   invisible(TRUE)
 }
 
-# brms summary export (works for fixed effects; keeps it light)
 brms_fixef_export <- function(fit, model_name, out_dir = tables_dir, sigfigs = 3) {
   dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
   
@@ -102,19 +92,10 @@ brms_fixef_export <- function(fit, model_name, out_dir = tables_dir, sigfigs = 3
 # - Each sourced script should rely on the shared objects above (analysis_date, output_dir, *_dir, theme_clean).
 # - Keep scripts writing outputs into these folders rather than the project root.
 
-# cleaning 
-source(file.path(analysis_dir, "01_CLEAN.R"))
-
-# EDA
-source(file.path(analysis_dir, "02_EXPLORE.R"))
-
-# modelling (Bayesian brms workflow)
-source(file.path(analysis_dir, "03_MODEL.R"))
-
-
-# species-specific slopes 
-source(file.path(analysis_dir, "04_SPP_MODELS.R"))
-
+source(file.path("analysis", "01_CLEAN.R"))
+source(file.path("analysis", "02_EXPLORE.R"))
+source(file.path("analysis", "03_MODEL.R"))
+source(file.path("analysis", "04_SPP_MODELS.R"))
 
 ### 04. END ####
 

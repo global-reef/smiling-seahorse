@@ -13,8 +13,13 @@ options(mc.cores = parallel::detectCores())
 set.seed(42)
 
 # expects from 00_RUN.R:
-# - fits_dir, plots_dir, stats_dir, tables_dir, summ_dir
-data_dir <- "data_clean"
+# - analysis_dir, fits_dir, plots_dir, stats_dir, tables_dir, summ_dir
+stopifnot(exists("analysis_dir"))
+stopifnot(dir.exists(analysis_dir))
+
+data_dir <- file.path(analysis_dir, "data_clean")
+stopifnot(dir.exists(data_dir))
+
 
 # keep model outputs inside this analysis folder
 model_dir <- file.path(fits_dir, "brms")
