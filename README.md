@@ -147,3 +147,20 @@ data-poor regions of Myanmar and Thailand.
 By combining automated scraping, manual validation, and hierarchical
 modelling, the workflow enables reproducible ecological inference from
 narrative dive logs.
+
+------------------------------------------------------------------------
+
+## 📝 Notes
+
+- Elasmobranch sightings are collected by dive professionals onboard the smiling seahorse liveaboard 
+- Fieldwork and data processing are ongoing; results may be updated as additional surveys and trip reports are completed.  
+- This project contributes to understanding long-term elasmobranch encounter trends and the ecological role of offshore reef systems in regional conservation planning.
+
+------------------------------------------------------------------------
+
+## 🔒 License
+
+This repository is private and not licensed for redistribution.
+
+For collaboration inquiries, please contact:  
+**scarlett@global-reef.com**
