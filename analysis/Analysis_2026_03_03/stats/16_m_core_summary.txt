@@ -1,0 +1,33 @@
+ Family: nbinom2  ( log )
+Formula:          n_trip ~ year_c * country + factor(month) + (1 | region)
+Data: trip_dat
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+   1190.6    1239.3    -580.3    1160.6       175 
+
+Random effects:
+
+Conditional model:
+ Groups Name        Variance  Std.Dev. 
+ region (Intercept) 9.308e-10 3.051e-05
+Number of obs: 190, groups:  region, 9
+
+Dispersion parameter for nbinom2 family (): 1.88 
+
+Conditional model:
+                       Estimate Std. Error z value Pr(>|z|)    
+(Intercept)             1.50096    0.22382   6.706 2.00e-11 ***
+year_c                  0.15627    0.02449   6.380 1.77e-10 ***
+countryThailand        -0.51321    0.30589  -1.678   0.0934 .  
+factor(month)2          0.10178    0.22174   0.459   0.6462    
+factor(month)3         -0.09058    0.20929  -0.433   0.6652    
+factor(month)4         -0.16723    0.20670  -0.809   0.4185    
+factor(month)5          0.17544    0.50900   0.345   0.7303    
+factor(month)7         -0.09439    0.85005  -0.111   0.9116    
+factor(month)9         -1.65723    1.25442  -1.321   0.1865    
+factor(month)10         0.04560    0.30066   0.152   0.8795    
+factor(month)11        -0.22847    0.21953  -1.041   0.2980    
+factor(month)12        -0.06154    0.20310  -0.303   0.7619    
+year_c:countryThailand -0.05644    0.03550  -1.590   0.1119    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1

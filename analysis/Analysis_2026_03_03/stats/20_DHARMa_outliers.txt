@@ -1,0 +1,12 @@
+
+	DHARMa bootstrapped outlier test
+
+data:  sim_res
+outliers at both margin(s) = 0, observations = 190, p-value = 0.5
+alternative hypothesis: two.sided
+ percent confidence interval:
+ 0.00000000 0.02381579
+sample estimates:
+outlier frequency (expected: 0.00705263157894737 ) 
+                                                 0 
+

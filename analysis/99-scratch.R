@@ -171,3 +171,119 @@ testOutliers(sim_res)
 
 
 
+
+### eco groups model (brms) ####
+
+library(tidyverse)
+library(tibble)
+library(brms)
+
+# expects: analysis_dir, data_clean_dir, elasmos, priors_nb, ctrl, model_dir, stats_dir
+stopifnot(exists("analysis_dir"), exists("elasmos"))
+stopifnot(exists("priors_nb"), exists("ctrl"), exists("model_dir"), exists("stats_dir"))
+
+data_clean_dir <- file.path(analysis_dir, "data_clean")
+dir.create(data_clean_dir, showWarnings = FALSE, recursive = TRUE)
+
+### eco group lookup ####
+
+eco_lookup <- tribble(
+  ~scientific_name,            ~eco_group,               ~note,
+  "Rhynchobatus australiae",   "Wedgefish_guitarfish",   NA,
+  "Rhynchobatus spp",          "Wedgefish_guitarfish",   "group-level",
+  "Rhina anclyostomus",        "Wedgefish_guitarfish",   NA,
+  "Acroteriobatus spp",        "Wedgefish_guitarfish",   "group-level",
+  "Rhinobatidae spp",          "Wedgefish_guitarfish",   "family/group-level",
+  
+  "Mobula alfredii",           "Mobulids",               NA,
+  "Mobula birostris",          "Mobulids",               NA,
+  "Mobula spp",                "Mobulids",               "group-level",
+  
+  "Rhinocodon typus",          "Large_pelagic",          NA,
+  "Galeocerdo cuvier",         "Large_pelagic",          NA,
+  
+  "Triaenodon obesus",         "Reef_sharks",            NA,
+  "Carcharhinus melanopterus", "Reef_sharks",            NA,
+  "Carcharhinus amblyrhynchos","Reef_sharks",            "mobile reef-associated",
+  
+  "Carcharhinus leucas",       "Large_coastal_sharks",   NA,
+  "Carcharhinus limbatus",     "Large_coastal_sharks",   NA,
+  "Carcharhinus albimarginatus","Large_coastal_sharks",  NA,
+  
+  "Chiloscyllium punctatum",   "Resident_or_benthic",    NA,
+  "Neotrygon kuhlii",          "Resident_or_benthic",    NA,
+  "Pastinachus ater",          "Resident_or_benthic",    NA,
+  "Taeniurops meyeni",         "Resident_or_benthic",    NA,
+  "Urogymnus asperrimus",      "Resident_or_benthic",    NA,
+  "Urogymnus granulatus",      "Resident_or_benthic",    NA,
+  "Pateobatis jenkinsii",      "Resident_or_benthic",    NA,
+  "Aetobatus ocellatus",       "Resident_or_benthic",    "arguable mobility",
+  "Batidae spp",               "Resident_or_benthic",    "group-level",
+  
+  "Selachii spp",              "Unresolved_group_level", "group-level",
+  "Carcharhinidae spp",        "Unresolved_group_level", "family/group-level",
+  
+  # fill your 3 missing assignments (edit if you want different bins)
+  "Atelomycterus marmoratus",  "Resident_or_benthic",    NA,
+  "Nebrius ferrugineus",       "Resident_or_benthic",    NA,
+  "Stegostoma tigrinum",       "Resident_or_benthic",    NA
+)
+
+# optional: write draft to inspect
+elasmos %>%
+  distinct(scientific_name) %>%
+  mutate(scientific_name = as.character(scientific_name)) %>%
+  left_join(eco_lookup, by = "scientific_name") %>%
+  arrange(scientific_name) %>%
+  write_csv(file.path(data_clean_dir, "eco_group_lookup.csv"))
+
+### join eco_group onto elasmos ####
+
+elasmos_ecogroup <- elasmos %>%
+  mutate(scientific_name = as.character(scientific_name)) %>%
+  left_join(eco_lookup, by = "scientific_name") %>%
+  mutate(eco_group = factor(eco_group))
+
+# hard stop if anything still missing
+missing_groups <- elasmos_ecogroup %>%
+  distinct(scientific_name, eco_group) %>%
+  filter(is.na(eco_group)) %>%
+  pull(scientific_name)
+
+if (length(missing_groups) > 0) {
+  stop("Eco group missing for: ", paste(missing_groups, collapse = ", "))
+}
+
+write_csv(elasmos_ecogroup, file.path(data_clean_dir, "elasmos_sightings_ecogroup.csv"))
+saveRDS(elasmos_ecogroup, file.path(data_clean_dir, "elasmos_sightings_ecogroup.rds"))
+
+### build trip-level eco_group dataset ####
+
+trip_ecogroup_dat <- elasmos_ecogroup %>%
+  group_by(trip_id, year, country, region, eco_group) %>%
+  summarise(n_group = sum(n_indiv, na.rm = TRUE), .groups = "drop") %>%
+  mutate(
+    year_c = year - 2012,
+    country = relevel(factor(country), ref = "Myanmar")
+  )
+
+### fit model (NEW FILE NAME) ####
+
+m_ecogroup <- brm(
+  n_group ~ year_c * eco_group + country + (1 | region) + (1 | trip_id),
+  data = trip_ecogroup_dat,
+  family = negbinomial(link = "log"),
+  prior = priors_nb,
+  chains = 4, iter = 4000, warmup = 1000,
+  control = ctrl,
+  backend = "cmdstanr",
+  seed = 123,
+  file = file.path(model_dir, "m_ecogroup")
+)
+
+capture.output(summary(m_ecogroup), file = file.path(stats_dir, "brms_m_ecogroup_summary.txt"))
+
+summary(m_ecogroup)
+
+
+
