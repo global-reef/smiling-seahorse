@@ -147,7 +147,9 @@ elasmos <- sightings_valid %>%
     species_epithet = iconv(species_epithet, from = "", to = "UTF-8", sub = ""),
     scientific_name = iconv(scientific_name, from = "", to = "UTF-8", sub = ""),
     scientific_name = case_when(
-      scientific_name == "acroteriovatus.spp" ~ "Acroteriobatus.spp",
+      scientific_name == "acroteriovatus spp" ~ "Acroteriobatus spp",
+      scientific_name == "Rhina anclyostoma" ~ "Rhina anclyostomus",
+      scientific_name == "Pastinachus sephen" ~ "Pastinachus ater",
       TRUE ~ scientific_name
     ),
     dive_site_std   = iconv(dive_site_std, from = "", to = "UTF-8", sub = ""),
