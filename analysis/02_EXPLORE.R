@@ -275,3 +275,84 @@ saveRDS(trip_dat,         file.path(data_clean_dir, "trip_dat.rds"))
 saveRDS(trip_group_dat,   file.path(data_clean_dir, "trip_group_dat.rds"))
 saveRDS(trip_species_dat, file.path(data_clean_dir, "trip_species_dat.rds"))
 
+
+
+#### some numbers for the main methods #### 
+range(trip_dat$ym, na.rm = TRUE)
+## trips 
+trip_dat %>%
+  summarise(
+    year_min = min(year, na.rm = TRUE),
+    year_max = max(year, na.rm = TRUE),
+    n_trips  = n_distinct(trip_id)
+  )
+
+trip_dat %>% summarise(n_trips = n_distinct(trip_id))
+nrow(trip_dat)
+
+trip_group_dat %>%
+  summarise(
+    n_rows = n(),
+    n_trips = n_distinct(trip_id),
+    rows_per_trip = n_rows / n_trips
+  )
+
+trip_group_dat %>% count(trip_id) %>% count(n, name = "n_trips")
+### species 
+trip_species_dat %>%
+  summarise(
+    n_rows = n(),
+    n_trips = n_distinct(trip_id),
+    n_species = n_distinct(scientific_name)
+  )
+
+# if elasmos exists (sightings-level)
+nrow(validated_sightings)
+
+validated_sightings %>% count(validation)  # if validation column still present
+## regions 
+trip_dat %>%
+  distinct(country, region) %>%
+  count(country, name = "n_regions")
+
+trip_dat %>% distinct(region) %>% summarise(n_regions_total = n())
+
+trip_dat %>%
+  count(country, region, name = "n_trips") %>%
+  arrange(country, desc(n_trips))
+
+trip_dat %>%
+  distinct(country, region) %>%
+  filter(str_detect(str_to_lower(region), "mergui|burma|banks"))
+
+trips_by_year <- trip_dat %>%
+  count(year, country, name = "n_trips") %>%
+  arrange(year, country)
+
+print(trips_by_year, n=Inf)
+
+trip_dat %>%
+  group_by(country) %>%
+  summarise(
+    year_min = min(year, na.rm = TRUE),
+    year_max = max(year, na.rm = TRUE),
+    n_trips = n_distinct(trip_id),
+    mean_trips_per_year = n_trips / (year_max - year_min + 1)
+  )
+
+# Requires sightings-level data with trip_id + dive_site_std (or dive_site)
+trip_itinerary <- elasmos %>%
+  distinct(trip_id, dive_site) %>%
+  count(trip_id, name = "n_sites")
+
+trip_itinerary %>%
+  summarise(
+    mean_sites = mean(n_sites),
+    median_sites = median(n_sites),
+    min_sites = min(n_sites),
+    max_sites = max(n_sites)
+  )
+
+trip_itinerary %>% count(n_sites) %>% arrange(n_sites)
+
+
