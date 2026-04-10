@@ -152,21 +152,28 @@ ggsave(file.path(plots_dir, "fig4_group_trends_by_country.png"),
 
 #### Figure 5: Species-level slope caterpillar, but plot percent change with trend classes #### 
 sp_summary <- read_csv(file.path(output_dir, "spp-specific", "scientific_name_trends_summary.csv"))
-
+sp_summary <- sp_summary %>%
+  mutate(
+    sci_label = scientific_name |>
+      gsub("\\.", " ", x = _) |>   # remove periods
+      gsub(" ", "~", x = _)        # plotmath spacing
+  )
 p_spp_pub <- ggplot(
   sp_summary,
-  aes(x = reorder(scientific_name, mean_percent_change), y = mean_percent_change)
+  aes(x = reorder(sci_label, mean_percent_change), y = mean_percent_change)
 ) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   geom_errorbar(aes(ymin = l95_percent_change, ymax = u95_percent_change), width = 0) +
   geom_point(aes(shape = trend), size = 2) +
   coord_flip() +
+  scale_x_discrete(labels = function(x) parse(text = paste0("italic(", x, ")"))) +
   labs(
     x = NULL,
     y = "Estimated annual change in encounters (%)",
     title = "Species-level temporal trajectories",
     subtitle = "Posterior mean and 95% credible interval; slopes pooled across countries"
-  ) + theme_clean
+  ) +
+  theme_clean
 
 ggsave(file.path(plots_dir, "fig5_species_percent_change_pub.png"),
        p_spp_pub, width = 7.8, height = 8.8, dpi = 300, bg = "white")

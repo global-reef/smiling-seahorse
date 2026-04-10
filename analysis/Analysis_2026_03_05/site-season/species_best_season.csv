@@ -1,0 +1,12 @@
+scientific_name,best_season,mean_prob_across_sites,l95_mean,u95_mean
+Aetobatus ocellatus,mid,0.16333380342165452,NA,NA
+Carcharhinus melanopterus,other,0.15792524538220284,NA,NA
+Mobula birostris,mid,0.15366174468721766,NA,NA
+Nebrius ferrugineus,other,0.164341977577316,NA,NA
+Neotrygon kuhlii,late,0.05264750738673745,NA,NA
+Pateobatis jenkinsii,early,0.06761085586316674,NA,NA
+Rhinobatidae spp,early,1.3958741034969874e-4,NA,NA
+Rhinocodon typus,late,0.15803530555983536,NA,NA
+Stegostoma tigrinum,mid,0.0526410827471338,NA,NA
+Taeniurops meyeni,early,0.1967346730143564,0.07368518777791276,0.7032371961203222
+Triaenodon obesus,mid,0.10526293885246236,NA,NA

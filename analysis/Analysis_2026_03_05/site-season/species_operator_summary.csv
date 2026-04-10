@@ -1,0 +1,12 @@
+scientific_name,converged,note,n_detect,n_sites,n_years,best_site,best_season,prob_best_site_avg,prob_best_season_avg
+Carcharhinus melanopterus,TRUE,OK,37,19,14,Koh Bida Nok,Other,1,0.158
+Stegostoma tigrinum,TRUE,OK,17,19,14,Shark Point,Feb-Mar,1,0.053
+Nebrius ferrugineus,TRUE,OK,47,19,14,Burma Banks,Other,0.773,0.164
+Triaenodon obesus,TRUE,OK,26,19,14,Shark Fin Reef,Feb-Mar,0.752,0.105
+Neotrygon kuhlii,FALSE,Optimizer convergence code: 1,20,19,14,Three Trees,Apr-May,0.75,0.053
+Taeniurops meyeni,TRUE,OK,62,19,14,Western Rocky,Nov-Jan,0.728,0.197
+Mobula birostris,FALSE,Optimizer convergence code: 1,47,19,14,Black Rock,Feb-Mar,0.658,0.154
+Aetobatus ocellatus,FALSE,Optimizer convergence code: 1,57,19,14,North Twin,Feb-Mar,0.601,0.163
+Rhinocodon typus,FALSE,Optimizer convergence code: 1,32,19,14,Richelieu Rock,Apr-May,0.25,0.158
+Pateobatis jenkinsii,FALSE,Optimizer convergence code: 1,20,19,14,Mergui Archipelago,Nov-Jan,0.136,0.068
+Rhinobatidae spp,TRUE,OK,11,19,14,Koh Chi,Nov-Jan,0,0

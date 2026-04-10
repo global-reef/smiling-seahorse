@@ -1,0 +1,166 @@
+scientific_name,rank,dive_site,season,prob,l95,u95
+Taeniurops meyeni,1,Western Rocky,early,0.8004142358513037,0.2550503213093142,0.9791560339935951
+Taeniurops meyeni,2,Western Rocky,other,0.7594988006479072,0.14974908661010164,0.9826462010121545
+Taeniurops meyeni,3,Western Rocky,late,0.6910260444029587,0.1551371668768528,0.9645898904358009
+Taeniurops meyeni,4,Western Rocky,mid,0.6622724515732922,0.12833054184419782,0.9631259469331134
+Taeniurops meyeni,5,Shark Cave,early,0.6417879155252911,0.36644834464364207,0.8473219554019134
+Taeniurops meyeni,6,Shark Cave,other,0.5852057768260145,0.2053011063264765,0.8851212647776843
+Taeniurops meyeni,7,Mergui Archipelago,early,0.5563789490140847,0.3520053779288733,0.7433004066380297
+Taeniurops meyeni,8,Shark Cave,late,0.4997919628597191,0.20235374439432927,0.7973774937979969
+Taeniurops meyeni,9,Mergui Archipelago,other,0.4968818487369863,0.17169932965125473,0.8247238423191543
+Taeniurops meyeni,10,Shark Cave,mid,0.46696938906004476,0.19545236894996781,0.7595717656161574
+Taeniurops meyeni,11,Mergui Archipelago,late,0.41156829302662506,0.19027677190257394,0.67551607915858225
+Taeniurops meyeni,12,Mergui Archipelago,mid,0.38013649750371725,0.184438269192107,0.6244839661382475
+Taeniurops meyeni,13,Burma Banks,early,0.32091152910110904,0.12286202855902961,0.614538536304521
+Taeniurops meyeni,14,Koh Bon,early,0.31090834128664185,0.12535492865762152,0.5868398666964054
+Taeniurops meyeni,15,Burma Banks,other,0.2712010213045249,0.0568990419377823,0.6965281996606197
+Mobula birostris,1,Black Rock,mid,0.7458864906506965,NA,NA
+Mobula birostris,2,Black Rock,other,0.6948263370431053,NA,NA
+Mobula birostris,3,Black Rock,late,0.6574643917858685,NA,NA
+Mobula birostris,4,Black Rock,early,0.5326776223831537,NA,NA
+Mobula birostris,5,Koh Tachai,mid,0.4341657326043654,NA,NA
+Mobula birostris,6,Koh Bon,mid,0.3919983525108459,NA,NA
+Mobula birostris,7,Koh Tachai,other,0.3731126846223766,NA,NA
+Mobula birostris,8,Koh Tachai,late,0.3341104303850302,NA,NA
+Mobula birostris,9,Koh Bon,other,0.333381287782094,NA,NA
+Mobula birostris,10,Koh Bon,late,0.2965674438317576,NA,NA
+Mobula birostris,11,Seafan Forest,mid,0.27516203792464183,NA,NA
+Mobula birostris,12,North Twin,mid,0.2710710722300178,NA,NA
+Mobula birostris,13,Similan Islands,mid,0.2610676622013638,NA,NA
+Mobula birostris,14,Koh Tachai,early,0.22956480212680547,NA,NA
+Mobula birostris,15,Seafan Forest,other,0.22747932535841295,NA,NA
+Aetobatus ocellatus,1,North Twin,mid,0.6835109539051619,NA,NA
+Aetobatus ocellatus,2,North Twin,early,0.6719634254333268,NA,NA
+Aetobatus ocellatus,3,North Twin,late,0.6313892780356498,NA,NA
+Aetobatus ocellatus,4,Seafan Forest,mid,0.5789229245901136,NA,NA
+Aetobatus ocellatus,5,Seafan Forest,early,0.565982476759697,NA,NA
+Aetobatus ocellatus,6,Seafan Forest,late,0.5216317055070081,NA,NA
+Aetobatus ocellatus,7,Koh Bon,mid,0.42280411666241957,NA,NA
+Aetobatus ocellatus,8,North Twin,other,0.41605469520335814,NA,NA
+Aetobatus ocellatus,9,Koh Bon,early,0.4099558358177792,NA,NA
+Aetobatus ocellatus,10,Koh Bon,late,0.36747945422112815,NA,NA
+Aetobatus ocellatus,11,Richelieu Rock,mid,0.34239353197702105,NA,NA
+Aetobatus ocellatus,12,Richelieu Rock,early,0.3305892512820294,NA,NA
+Aetobatus ocellatus,13,Seafan Forest,other,0.31204174444071364,NA,NA
+Aetobatus ocellatus,14,Richelieu Rock,late,0.2922629915387236,NA,NA
+Aetobatus ocellatus,15,Mergui Archipelago,mid,0.24492172536676535,NA,NA
+Nebrius ferrugineus,1,Burma Banks,other,0.9085550294816449,NA,NA
+Nebrius ferrugineus,2,Burma Banks,early,0.8193812465998882,NA,NA
+Nebrius ferrugineus,3,Burma Banks,mid,0.7756760036285265,NA,NA
+Nebrius ferrugineus,4,Mergui Archipelago,other,0.6473343436783626,NA,NA
+Nebrius ferrugineus,5,Burma Banks,late,0.5895719497457967,NA,NA
+Nebrius ferrugineus,6,Shark Cave,other,0.45917160096308407,NA,NA
+Nebrius ferrugineus,7,Mergui Archipelago,early,0.45596076175111133,NA,NA
+Nebrius ferrugineus,8,Mergui Archipelago,mid,0.3898049613233198,NA,NA
+Nebrius ferrugineus,9,Three Trees,other,0.353581524371075,NA,NA
+Nebrius ferrugineus,10,Shark Cave,early,0.27936066779269497,NA,NA
+Nebrius ferrugineus,11,North Twin,other,0.2678414613267852,NA,NA
+Nebrius ferrugineus,12,Elephant Head Rock,other,0.257158873008603,NA,NA
+Nebrius ferrugineus,13,Shark Cave,mid,0.22808560691384866,NA,NA
+Nebrius ferrugineus,14,Mergui Archipelago,late,0.20972571973821189,NA,NA
+Nebrius ferrugineus,15,Three Trees,early,0.19984073124316187,NA,NA
+Carcharhinus melanopterus,1,Koh Bida Nok,other,1,NA,NA
+Carcharhinus melanopterus,2,Koh Bida Nok,mid,0.9999999999917193,NA,NA
+Carcharhinus melanopterus,3,Shark Point,other,0.9999999998343434,NA,NA
+Carcharhinus melanopterus,4,Koh Bida Nok,late,0.9999999993761686,NA,NA
+Carcharhinus melanopterus,5,Koh Bida Nok,early,0.9999999918430046,NA,NA
+Carcharhinus melanopterus,6,Koh Tachai,other,0.9999912465402155,NA,NA
+Carcharhinus melanopterus,7,Shark Point,mid,0.999535531601954,NA,NA
+Carcharhinus melanopterus,8,Shark Point,late,0.9661765029464172,NA,NA
+Carcharhinus melanopterus,9,Shark Point,early,0.685990347639596,NA,NA
+Carcharhinus melanopterus,10,Koh Tachai,mid,0.03913193254520232,NA,NA
+Carcharhinus melanopterus,11,Koh Tachai,late,5.402922313637419e-4,NA,NA
+Carcharhinus melanopterus,12,Koh Chi,other,5.002789802055321e-4,NA,NA
+Carcharhinus melanopterus,13,Surin Islands,other,8.813689848189113e-5,NA,NA
+Carcharhinus melanopterus,14,Koh Tachai,early,4.13411469250862e-5,NA,NA
+Carcharhinus melanopterus,15,Koh Chi,mid,1.784352511709778e-10,NA,NA
+Rhinocodon typus,1,Richelieu Rock,late,0.9999933368276427,NA,NA
+Rhinocodon typus,2,Koh Chi,late,0.9999912624205384,NA,NA
+Rhinocodon typus,3,Mergui Archipelago,late,0.9999713281636966,NA,NA
+Rhinocodon typus,4,8 Mile Rock,late,0.002365485797918396,NA,NA
+Rhinocodon typus,5,Three Trees,late,1.2123671165847353e-4,NA,NA
+Rhinocodon typus,6,Shark Fin Reef,late,1.0902125791528296e-4,NA,NA
+Rhinocodon typus,7,Similan Islands,late,5.49838500051213e-5,NA,NA
+Rhinocodon typus,8,Elephant Head Rock,late,4.845388684776303e-5,NA,NA
+Rhinocodon typus,9,Richelieu Rock,other,1.1006007882252396e-5,NA,NA
+Rhinocodon typus,10,Koh Chi,other,8.393052939023954e-6,NA,NA
+Rhinocodon typus,11,Richelieu Rock,early,6.026000924587491e-6,NA,NA
+Rhinocodon typus,12,Richelieu Rock,mid,5.8713228735257545e-6,NA,NA
+Rhinocodon typus,13,Koh Chi,early,4.595352421506962e-6,NA,NA
+Rhinocodon typus,14,Koh Tachai,late,4.569048203644713e-6,NA,NA
+Rhinocodon typus,15,North Twin,late,4.506161493930175e-6,NA,NA
+Triaenodon obesus,1,Shark Fin Reef,mid,0.9999932642542866,NA,NA
+Triaenodon obesus,2,Shark Fin Reef,early,0.9999932001732768,NA,NA
+Triaenodon obesus,3,Shark Fin Reef,late,0.9999919363059578,NA,NA
+Triaenodon obesus,4,Elephant Head Rock,mid,0.9999875878931253,NA,NA
+Triaenodon obesus,5,Elephant Head Rock,early,0.9999874698103149,NA,NA
+Triaenodon obesus,6,Elephant Head Rock,late,0.999985140870142,NA,NA
+Triaenodon obesus,7,Shark Fin Reef,other,0.007103204810634843,NA,NA
+Triaenodon obesus,8,Elephant Head Rock,other,0.0038672758168995093,NA,NA
+Triaenodon obesus,9,Mergui Archipelago,mid,5.506543234358221e-6,NA,NA
+Triaenodon obesus,10,Mergui Archipelago,early,5.45464995573613e-6,NA,NA
+Triaenodon obesus,11,Mergui Archipelago,late,4.5997106504474745e-6,NA,NA
+Triaenodon obesus,12,Surin Islands,mid,3.2726604137568602e-6,NA,NA
+Triaenodon obesus,13,Surin Islands,early,3.241819022476755e-6,NA,NA
+Triaenodon obesus,14,Surin Islands,late,2.73370875010438e-6,NA,NA
+Triaenodon obesus,15,Similan Islands,mid,2.2876221964520966e-6,NA,NA
+Neotrygon kuhlii,1,Three Trees,late,0.9999661627327072,NA,NA
+Neotrygon kuhlii,2,Three Trees,early,0.9999396998325838,NA,NA
+Neotrygon kuhlii,3,Three Trees,mid,0.99993207029314,NA,NA
+Neotrygon kuhlii,4,North Twin,late,9.387533532835253e-5,NA,NA
+Neotrygon kuhlii,5,Koh Chi,late,8.405894163584162e-5,NA,NA
+Neotrygon kuhlii,6,Richelieu Rock,late,7.397638005179606e-5,NA,NA
+Neotrygon kuhlii,7,North Twin,early,5.267865343385985e-5,NA,NA
+Neotrygon kuhlii,8,Koh Chi,early,4.716992766544252e-5,NA,NA
+Neotrygon kuhlii,9,North Twin,mid,4.676195918741511e-5,NA,NA
+Neotrygon kuhlii,10,Koh Chi,mid,4.187192959121072e-5,NA,NA
+Neotrygon kuhlii,11,Richelieu Rock,early,4.151188424497936e-5,NA,NA
+Neotrygon kuhlii,12,Richelieu Rock,mid,3.684935881125018e-5,NA,NA
+Neotrygon kuhlii,13,Koh Tachai,late,2.3475892560128476e-5,NA,NA
+Neotrygon kuhlii,14,Similan Islands,late,1.6944472325083185e-5,NA,NA
+Neotrygon kuhlii,15,Mergui Archipelago,late,1.5144414096275583e-5,NA,NA
+Pateobatis jenkinsii,1,Mergui Archipelago,early,0.296081012481251,NA,NA
+Pateobatis jenkinsii,2,Mergui Archipelago,mid,0.1910223941414199,NA,NA
+Pateobatis jenkinsii,3,Western Rocky,early,0.17478400543957195,NA,NA
+Pateobatis jenkinsii,4,Richelieu Rock,early,0.14742341310704757,NA,NA
+Pateobatis jenkinsii,5,Koh Chi,early,0.13515268238513153,NA,NA
+Pateobatis jenkinsii,6,Similan Islands,early,0.13227653747528573,NA,NA
+Pateobatis jenkinsii,7,Koh Bon,early,0.12751785839856683,NA,NA
+Pateobatis jenkinsii,8,Surin Islands,early,0.11775428163832197,NA,NA
+Pateobatis jenkinsii,9,Western Rocky,mid,0.10626772855311697,NA,NA
+Pateobatis jenkinsii,10,Richelieu Rock,mid,0.08848261010957102,NA,NA
+Pateobatis jenkinsii,11,Koh Chi,mid,0.08065369504556866,NA,NA
+Pateobatis jenkinsii,12,Black Rock,early,0.0797833375419481,NA,NA
+Pateobatis jenkinsii,13,Similan Islands,mid,0.07883161250097165,NA,NA
+Pateobatis jenkinsii,14,Koh Bon,mid,0.07582760887179847,NA,NA
+Pateobatis jenkinsii,15,Elephant Head Rock,early,0.07383313293238747,NA,NA
+Stegostoma tigrinum,1,Shark Point,mid,0.9999986865366949,NA,NA
+Stegostoma tigrinum,2,Shark Point,other,0.9999975092818028,NA,NA
+Stegostoma tigrinum,3,Shark Point,early,0.9999936729215824,NA,NA
+Stegostoma tigrinum,4,Shark Point,late,0.9999918576570195,NA,NA
+Stegostoma tigrinum,5,Elephant Head Rock,mid,1.3955092206229656e-4,NA,NA
+Stegostoma tigrinum,6,Elephant Head Rock,other,7.359599757954537e-5,NA,NA
+Stegostoma tigrinum,7,Koh Bon,mid,3.9217585971082665e-5,NA,NA
+Stegostoma tigrinum,8,Elephant Head Rock,early,2.8972988061259726e-5,NA,NA
+Stegostoma tigrinum,9,Elephant Head Rock,late,2.251381687347931e-5,NA,NA
+Stegostoma tigrinum,10,Koh Bon,other,2.068148630749316e-5,NA,NA
+Stegostoma tigrinum,11,Koh Bon,early,8.141546419770747e-6,NA,NA
+Stegostoma tigrinum,12,Koh Bon,late,6.326459442152416e-6,NA,NA
+Stegostoma tigrinum,13,North Twin,mid,1.8391082552950318e-6,NA,NA
+Stegostoma tigrinum,14,Similan Islands,mid,1.1245650383200233e-6,NA,NA
+Stegostoma tigrinum,15,North Twin,other,9.698409342719326e-7,NA,NA
+Rhinobatidae spp,1,Koh Chi,early,8.389964251207126e-4,NA,NA
+Rhinobatidae spp,2,Elephant Head Rock,early,5.710361994535874e-4,NA,NA
+Rhinobatidae spp,3,Koh Bon,early,4.8043058341083224e-4,NA,NA
+Rhinobatidae spp,4,Koh Chi,late,4.7190672181709824e-4,NA,NA
+Rhinobatidae spp,5,Shark Point,early,4.0490924749872096e-4,NA,NA
+Rhinobatidae spp,6,Elephant Head Rock,late,3.211505987503452e-4,NA,NA
+Rhinobatidae spp,7,Koh Bon,late,2.7018330701644987e-4,NA,NA
+Rhinobatidae spp,8,Shark Point,late,2.2770428454465988e-4,NA,NA
+Rhinobatidae spp,9,Koh Chi,mid,1.7610990113157312e-4,NA,NA
+Rhinobatidae spp,10,Similan Islands,early,1.6695816537155625e-4,NA,NA
+Rhinobatidae spp,11,Elephant Head Rock,mid,1.1983820337770246e-4,NA,NA
+Rhinobatidae spp,12,Koh Bon,mid,1.0081640039864286e-4,NA,NA
+Rhinobatidae spp,13,Similan Islands,late,9.388061558363818e-5,NA,NA
+Rhinobatidae spp,14,Shark Point,mid,8.496348326697407e-5,NA,NA
+Rhinobatidae spp,15,Surin Islands,early,7.160795324495242e-5,NA,NA
