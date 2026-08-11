@@ -148,3 +148,5 @@ ggsave(file.path(plots_dir, "fig5_species_percent_change_pub.png"),
 
 ggsave(file.path(plots_dir, "fig5_species_percent_change_pub.pdf"),
        p_spp_pub, width = 7.8, height = 8.8, device = cairo_pdf, bg = "white")
+
+
