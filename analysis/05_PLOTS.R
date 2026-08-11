@@ -7,7 +7,7 @@ library(tidybayes)
 # fig 1 will be a map of sightings 
 # see 06_MAP.R 
 
-### Figure 2: Overall temporal trends ####
+### Figure null: Overall temporal trends ####
 
 m_core <- readRDS(file.path(fits_dir, "brms", "m_core.rds"))
 
@@ -58,7 +58,7 @@ p_core_trend
 ggsave(file.path(plots_dir, "fig2_core_country_trends.png"),
        p_core_trend, width = 7.2, height = 4.5, dpi = 600, bg = "white")
 
-##### Figure 3: Raw data + model trend overlay for transparency ##### 
+##### Figure 4: Raw data + model trend overlay for transparency ##### 
 
 p_core_overlay <- ggplot() +
   geom_point(
@@ -91,16 +91,16 @@ p_core_overlay <- ggplot() +
 
 p_core_overlay
 
-ggsave(file.path(plots_dir, "fig2i_core_overlay.png"),
+ggsave(file.path(plots_dir, "fig4_core_overlay.png"),
        p_core_overlay, width = 4.8, height = 4.8, dpi = 600, bg = "white")
 
 p_core_overlay_pdf <- p_core_overlay +
   theme(text = element_text(family = "sans"))
 
-ggsave(file.path(plots_dir, "fig2i_core_overlay.pdf"),
+ggsave(file.path(plots_dir, "fig4_core_overlay.pdf"),
        p_core_overlay_pdf, width = 4.8, height = 4.8, bg = "white")
 
-##### Figure 4: Sharks vs rays decomposition with country-adjusted trends #######
+##### Figure 5: Sharks vs rays decomposition with country-adjusted trends #######
 
 m_group <- readRDS(file.path(fits_dir, "brms", "m_group.rds"))
 
@@ -141,15 +141,15 @@ p_group <- ggplot(group_epred, aes(year, mu, colour = group, fill = group)) +
 
 p_group
 
-ggsave(file.path(plots_dir, "fig4_group_trends_by_country.png"),
+ggsave(file.path(plots_dir, "fig5_group_trends_by_country.png"),
        p_group, width = 7.6, height = 4.2, dpi = 600, bg = "white")
 
-ggsave(file.path(plots_dir, "fig4_group_trends_by_country.pdf"),
+ggsave(file.path(plots_dir, "fig5_group_trends_by_country.pdf"),
        p_group + theme(text = element_text(family = "sans")),
        width = 7.6, height = 4.2, bg = "white")
 
 
-##### Figure 5: Species-specific caterpillar #######
+##### Figure 6: Species-specific caterpillar #######
 
 library(readr)
 library(stringr)
@@ -184,10 +184,11 @@ spp_meta <- elasmos_iucn %>%
 #### Colours 
 
 trend_cols <- c(
-  "Increasing (> 0)" = "#007A87",
-  "Uncertain (CI overlaps 0)" = "grey50",
-  "Decreasing (< 0)" = "#D55E00"
+  "Increasing" = "#007A87",
+  "Uncertain" = "grey50",
+  "Decreasing" = "#D55E00"
 )
+
 
 #### Prepare plot data 
 
@@ -201,9 +202,9 @@ sp_summary_plot <- sp_summary %>%
   mutate(
     panel = factor(panel, levels = c("Sharks", "Rays and batoids")),
     trend_class = case_when(
-      l95_percent_change > 0 ~ "Increasing (> 0)",
-      u95_percent_change < 0 ~ "Decreasing (< 0)",
-      TRUE ~ "Uncertain (CI overlaps 0)"
+      p_pos > 0.90 ~ "Increasing",
+      p_pos < 0.10 ~ "Decreasing",
+      TRUE ~ "Uncertain"
     ),
     trend_class = factor(trend_class, levels = names(trend_cols)),
     star = if_else(focal_threatened, "~'*'", ""),
@@ -263,16 +264,127 @@ p_spp_pub
 
 #### Export 
 
-ggsave(file.path(plots_dir, "fig5_species_percent_change_pub.png"),
+ggsave(file.path(plots_dir, "fig6_species_percent_change_pub.png"),
        p_spp_pub, width = 7, height = 7, dpi = 600, bg = "white")
 
-ggsave(file.path(plots_dir, "fig5_species_percent_change_pub.pdf"),
+ggsave(file.path(plots_dir, "fig6_species_percent_change_pub.pdf"),
        p_spp_pub, width = 7, height = 7, bg = "white")
 
 ### print all 
-p_core_trend # fig 2 
-p_core_overlay # fig 3 
-p_group # fig 4 
-p_spp_pub # fig 5 
+p_core_trend # fig 4 not using 
+p_core_overlay # fig 4
+p_group # fig 5
+p_spp_pub # fig 6
 
 
+
+### Figure 6?: Spp-level posterior distributions ####
+
+#### Load posterior draws + summaries
+
+sp_draws <- readRDS(file.path(output_dir, "spp-specific", "scientific_name_slope_draws.rds")) %>%
+  mutate(scientific_name = scientific_name %>% str_replace_all("\\.", " ") %>%
+           recode("Neotrygon kuhlii" = "Neotrygon caeruleopunctata"))
+
+sp_summary <- read_csv(file.path(output_dir, "spp-specific", "scientific_name_trends_summary.csv")) %>%
+  mutate(scientific_name = scientific_name %>% str_replace_all("\\.", " ") %>%
+           recode("Neotrygon kuhlii" = "Neotrygon caeruleopunctata"))
+
+#### Species metadata 
+
+spp_meta <- elasmos_iucn %>%
+  mutate(
+    scientific_name = recode(scientific_name, "Neotrygon kuhlii" = "Neotrygon caeruleopunctata"),
+    group = if_else(scientific_name %in% c("Rhynchobatus australiae", "Rhynchobatus spp"), "ray", group),
+    name_join = scientific_name %>% str_replace_all("\\.", " ") %>% str_squish() %>% str_to_lower()
+  ) %>%
+  distinct(name_join, scientific_name, group, iucn_status, iucn_threatened, iucn_severity) %>%
+  group_by(name_join, group) %>%
+  slice_max(iucn_severity, n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  mutate(
+    panel = case_when(group == "shark" ~ "Sharks", group == "ray" ~ "Rays and batoids", TRUE ~ NA_character_),
+    focal_threatened = iucn_status %in% c("CR", "EN")
+  )
+
+#### Colours 
+
+trend_cols <- c(
+  "Increasing (> 0)" = "#007A87",
+  "Uncertain (CI overlaps 0)" = "grey50",
+  "Decreasing (< 0)" = "#D55E00"
+)
+
+#### Species labels + ordering 
+
+sp_plot_meta <- sp_summary %>%
+  mutate(name_join = scientific_name %>% str_squish() %>% str_to_lower()) %>%
+  left_join(spp_meta, by = "name_join", suffix = c("", "_iucn")) %>%
+  filter(panel %in% c("Sharks", "Rays and batoids")) %>%
+  mutate(
+    panel = factor(panel, levels = c("Sharks", "Rays and batoids")),
+    trend_class = case_when(
+      p_pos > 0.90 ~ "Increasing",
+      p_pos < 0.10 ~ "Decreasing",
+      TRUE ~ "Uncertain"
+    ),
+    trend_class = factor(trend_class, levels = names(trend_cols)),
+    star = if_else(focal_threatened, "~'*'", ""),
+    label_plotmath = case_when(
+      str_detect(scientific_name, " spp$") ~ paste0(
+        "italic(", str_remove(scientific_name, " spp$") %>% str_replace_all(" ", "~"), ")~spp", star),
+      TRUE ~ paste0("italic(", scientific_name %>% str_replace_all(" ", "~"), ")", star)
+    ),
+    label_key = paste(panel, scientific_name, sep = "__")
+  ) %>%
+  arrange(mean_percent_change) %>%
+  mutate(label_order = factor(label_key, levels = unique(label_key)))
+
+label_lookup <- sp_plot_meta %>%
+  distinct(label_order, label_plotmath) %>%
+  deframe()
+
+#### Join posterior draws 
+
+sp_draws_plot <- sp_draws %>%
+  mutate(name_join = scientific_name %>% str_squish() %>% str_to_lower()) %>%
+  left_join(
+    sp_plot_meta %>% select(name_join, panel, trend_class, label_key, label_order),
+    by = "name_join"
+  ) %>%
+  filter(!is.na(panel))
+
+#### Plot 
+
+p_spp_pub <- ggplot(sp_draws_plot, aes(x = percent_change, y = label_order,
+                                       fill = trend_class, colour = trend_class)) +
+  geom_vline(xintercept = 0, linetype = "dashed", colour = "grey45", linewidth = 0.35) +
+  stat_halfeye(.width = 0.95, point_interval = mean_qi, slab_alpha = 0.65,
+               point_size = 1.6, interval_size = 0.6) +
+  facet_wrap(~panel, ncol = 1, scales = "free_y",
+             labeller = as_labeller(c("Sharks" = "A", "Rays and batoids" = "B"))) +
+  scale_y_discrete(labels = \(x) parse(text = label_lookup[x])) +
+  scale_fill_manual(values = trend_cols, breaks = names(trend_cols), drop = FALSE, name = NULL) +
+  scale_colour_manual(values = trend_cols, breaks = names(trend_cols), drop = FALSE, name = NULL) +
+  labs(x = "Estimated annual change in encounters (% per year)", y = NULL) +
+  theme_clean +
+  theme(
+    text = element_text(family = "sans"), axis.ticks.y = element_blank(),
+    axis.text.y = element_text(size = 8.5, colour = "black"),
+    axis.text.x = element_text(size = 9, colour = "black"),
+    axis.title.x = element_text(size = 10, colour = "black"),
+    strip.background = element_blank(),
+    strip.text = element_text(face = "bold", hjust = 0, size = 11),
+    legend.position = "bottom", legend.text = element_text(size = 8.5),
+    panel.spacing.y = unit(0.8, "lines")
+  )
+
+p_spp_pub
+
+#### Export 
+
+ggsave(file.path(plots_dir, "fig6i_species_posterior_distributions.png"),
+       p_spp_pub, width = 7, height = 7, dpi = 600, bg = "white")
+
+ggsave(file.path(plots_dir, "fig6i_species_posterior_distributions.pdf"),
+       p_spp_pub, width = 7, height = 7, bg = "white")
