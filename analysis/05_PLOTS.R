@@ -280,19 +280,30 @@ ggsave(file.path(plots_dir, "fig6i_species_percent_change_pub.pdf"),
 #### Load posterior draws + summaries
 
 sp_draws <- readRDS(file.path(output_dir, "spp-specific", "scientific_name_slope_draws.rds")) %>%
-  mutate(scientific_name = scientific_name %>% str_replace_all("\\.", " ") %>%
-           recode("Neotrygon kuhlii" = "Neotrygon caeruleopunctata"))
+  mutate(scientific_name = scientific_name %>%
+           str_replace_all("\\.", " ") %>%
+           recode(
+             "Neotrygon kuhlii" = "Neotrygon caeruleopunctata",
+             "Batidae spp" = "Batoidea spp"
+           ))
 
 sp_summary <- read_csv(file.path(output_dir, "spp-specific", "scientific_name_trends_summary.csv")) %>%
-  mutate(scientific_name = scientific_name %>% str_replace_all("\\.", " ") %>%
-           recode("Neotrygon kuhlii" = "Neotrygon caeruleopunctata"))
+  mutate(scientific_name = scientific_name %>%
+           str_replace_all("\\.", " ") %>%
+           recode(
+             "Neotrygon kuhlii" = "Neotrygon caeruleopunctata",
+             "Batidae spp" = "Batoidea spp"
+           ))
 
 #### Species metadata 
 
 spp_meta <- elasmos_iucn %>%
   mutate(
-    scientific_name = recode(scientific_name, "Neotrygon kuhlii" = "Neotrygon caeruleopunctata"),
-    group = if_else(scientific_name %in% c("Rhynchobatus australiae", "Rhynchobatus spp"), "ray", group),
+    scientific_name = recode(
+      scientific_name,
+      "Neotrygon kuhlii" = "Neotrygon caeruleopunctata",
+      "Batidae spp" = "Batoidea spp"
+    ),
     name_join = scientific_name %>% str_replace_all("\\.", " ") %>% str_squish() %>% str_to_lower()
   ) %>%
   distinct(name_join, scientific_name, group, iucn_status, iucn_threatened, iucn_severity) %>%
