@@ -3,3 +3,6 @@
 .Rproj.user/
 output/
 
+# seasonal exploratory analysis
+06_seasons.R
+analysis/Analysis_*/site-season/

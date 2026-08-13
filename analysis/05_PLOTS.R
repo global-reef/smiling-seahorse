@@ -3,11 +3,12 @@
 library(tidyverse)
 library(brms)
 library(tidybayes)
+library(patchwork)
 
 # fig 1 will be a map of sightings 
 # see 06_MAP.R 
 
-### Figure null: Overall temporal trends ####
+### Figure NA: Overall temporal trends ####
 
 m_core <- readRDS(file.path(fits_dir, "brms", "m_core.rds"))
 
@@ -149,7 +150,7 @@ ggsave(file.path(plots_dir, "fig5_group_trends_by_country.pdf"),
        width = 7.6, height = 4.2, bg = "white")
 
 
-##### Figure 6: Species-specific caterpillar #######
+##### Figure NA: Species-specific caterpillar #######
 
 library(readr)
 library(stringr)
@@ -237,7 +238,7 @@ sp_summary %>%
 
 #### Plot 
 
-p_spp_pub <- ggplot(sp_summary_plot, aes(x = mean_percent_change, y = label_order, colour = trend_class)) +
+p_spp_pub1 <- ggplot(sp_summary_plot, aes(x = mean_percent_change, y = label_order, colour = trend_class)) +
   geom_point(
     data = tibble(trend_class = factor(names(trend_cols), levels = names(trend_cols))),
     aes(x = Inf, y = NA, colour = trend_class),
@@ -260,25 +261,21 @@ p_spp_pub <- ggplot(sp_summary_plot, aes(x = mean_percent_change, y = label_orde
     legend.text = element_text(size = 8.5), panel.spacing.y = unit(0.8, "lines")
   )
 
-p_spp_pub
+p_spp_pub1
 
 #### Export 
 
-ggsave(file.path(plots_dir, "fig6_species_percent_change_pub.png"),
-       p_spp_pub, width = 7, height = 7, dpi = 600, bg = "white")
+ggsave(file.path(plots_dir, "fig6i_species_percent_change_pub.png"),
+       p_spp_pub1, width = 7, height = 7, dpi = 600, bg = "white")
 
-ggsave(file.path(plots_dir, "fig6_species_percent_change_pub.pdf"),
-       p_spp_pub, width = 7, height = 7, bg = "white")
-
-### print all 
-p_core_trend # fig 4 not using 
-p_core_overlay # fig 4
-p_group # fig 5
-p_spp_pub # fig 6
+ggsave(file.path(plots_dir, "fig6i_species_percent_change_pub.pdf"),
+       p_spp_pub1, width = 7, height = 7, bg = "white")
 
 
 
-### Figure 6?: Spp-level posterior distributions ####
+
+
+### Figure 6: Spp-level posterior distributions ####
 
 #### Load posterior draws + summaries
 
@@ -303,16 +300,16 @@ spp_meta <- elasmos_iucn %>%
   slice_max(iucn_severity, n = 1, with_ties = FALSE) %>%
   ungroup() %>%
   mutate(
-    panel = case_when(group == "shark" ~ "Sharks", group == "ray" ~ "Rays and batoids", TRUE ~ NA_character_),
+    panel = case_when(group == "shark" ~ "Sharks", group == "ray" ~ "Rays", TRUE ~ NA_character_),
     focal_threatened = iucn_status %in% c("CR", "EN")
   )
 
 #### Colours 
 
 trend_cols <- c(
-  "Increasing (> 0)" = "#007A87",
-  "Uncertain (CI overlaps 0)" = "grey50",
-  "Decreasing (< 0)" = "#D55E00"
+  "Increasing" = "#007A87",
+  "Uncertain" = "grey50",
+  "Decreasing" = "#D55E00"
 )
 
 #### Species labels + ordering 
@@ -320,9 +317,9 @@ trend_cols <- c(
 sp_plot_meta <- sp_summary %>%
   mutate(name_join = scientific_name %>% str_squish() %>% str_to_lower()) %>%
   left_join(spp_meta, by = "name_join", suffix = c("", "_iucn")) %>%
-  filter(panel %in% c("Sharks", "Rays and batoids")) %>%
+  filter(panel %in% c("Sharks", "Rays")) %>%
   mutate(
-    panel = factor(panel, levels = c("Sharks", "Rays and batoids")),
+    panel = factor(panel, levels = c("Sharks", "Rays")),
     trend_class = case_when(
       p_pos > 0.90 ~ "Increasing",
       p_pos < 0.10 ~ "Decreasing",
@@ -332,7 +329,8 @@ sp_plot_meta <- sp_summary %>%
     star = if_else(focal_threatened, "~'*'", ""),
     label_plotmath = case_when(
       str_detect(scientific_name, " spp$") ~ paste0(
-        "italic(", str_remove(scientific_name, " spp$") %>% str_replace_all(" ", "~"), ")~spp", star),
+        "italic(", str_remove(scientific_name, " spp$") %>% str_replace_all(" ", "~"), ")~spp", star
+      ),
       TRUE ~ paste0("italic(", scientific_name %>% str_replace_all(" ", "~"), ")", star)
     ),
     label_key = paste(panel, scientific_name, sep = "__")
@@ -356,35 +354,155 @@ sp_draws_plot <- sp_draws %>%
 
 #### Plot 
 
-p_spp_pub <- ggplot(sp_draws_plot, aes(x = percent_change, y = label_order,
-                                       fill = trend_class, colour = trend_class)) +
+p_spp_pub <- ggplot(
+  sp_draws_plot,
+  aes(x = percent_change, y = label_order, fill = trend_class, colour = trend_class)
+) +
   geom_vline(xintercept = 0, linetype = "dashed", colour = "grey45", linewidth = 0.35) +
   stat_halfeye(.width = 0.95, point_interval = mean_qi, slab_alpha = 0.65,
                point_size = 1.6, interval_size = 0.6) +
   facet_wrap(~panel, ncol = 1, scales = "free_y",
-             labeller = as_labeller(c("Sharks" = "A", "Rays and batoids" = "B"))) +
+             labeller = as_labeller(c("Sharks" = "A", "Rays" = "B"))) +
+  coord_cartesian(xlim = c(-22, 26)) +
+  scale_x_continuous(breaks = c(-20, 0, 20)) +
   scale_y_discrete(labels = \(x) parse(text = label_lookup[x])) +
   scale_fill_manual(values = trend_cols, breaks = names(trend_cols), drop = FALSE, name = NULL) +
   scale_colour_manual(values = trend_cols, breaks = names(trend_cols), drop = FALSE, name = NULL) +
   labs(x = "Estimated annual change in encounters (% per year)", y = NULL) +
   theme_clean +
   theme(
-    text = element_text(family = "sans"), axis.ticks.y = element_blank(),
-    axis.text.y = element_text(size = 8.5, colour = "black"),
+    text = element_text(family = "sans"),
+    axis.ticks.y = element_blank(),
+    axis.text.y = element_text(size = 9.5, colour = "black"),
     axis.text.x = element_text(size = 9, colour = "black"),
     axis.title.x = element_text(size = 10, colour = "black"),
     strip.background = element_blank(),
     strip.text = element_text(face = "bold", hjust = 0, size = 11),
-    legend.position = "bottom", legend.text = element_text(size = 8.5),
-    panel.spacing.y = unit(0.8, "lines")
+    legend.position = "bottom",
+    legend.text = element_text(size = 8.5),
+    panel.spacing.y = unit(0.5, "lines")
   )
 
 p_spp_pub
 
+
+
 #### Export 
 
-ggsave(file.path(plots_dir, "fig6i_species_posterior_distributions.png"),
-       p_spp_pub, width = 7, height = 7, dpi = 600, bg = "white")
+ggsave(file.path(plots_dir, "fig6_species_posterior_distributions.png"),
+       p_spp_pub, width = 6.4, height = 6.8, dpi = 600, bg = "white")
 
-ggsave(file.path(plots_dir, "fig6i_species_posterior_distributions.pdf"),
-       p_spp_pub, width = 7, height = 7, bg = "white")
+ggsave(file.path(plots_dir, "fig6_species_posterior_distributions.pdf"),
+       p_spp_pub, width = 6.4, height = 6.8, bg = "white")
+
+
+### print all 
+p_core_trend # fig 4 not using 
+p_core_overlay # fig 4
+p_group # fig 5
+p_spp_pub # fig 6
+
+
+
+
+##### Figure 5: Group trends + posterior slope distributions ####
+
+library(patchwork)
+
+#### Prediction data 
+
+m_group <- readRDS(file.path(fits_dir, "brms", "m_group.rds"))
+
+year_seq <- seq(min(trip_group_dat$year_c), max(trip_group_dat$year_c), length.out = 200)
+
+newdat_group <- expand_grid(
+  year_c = year_seq,
+  group = levels(trip_group_dat$group),
+  country = levels(trip_group_dat$country),
+  month = sort(unique(trip_group_dat$month)),
+  region = NA_character_,
+  trip_id = NA_character_
+)
+
+group_epred <- m_group %>%
+  add_epred_draws(newdata = newdat_group, re_formula = NA) %>%
+  group_by(.draw, country, group, year_c) %>%
+  summarise(.epred = mean(.epred), .groups = "drop") %>%
+  group_by(country, group, year_c) %>%
+  summarise(mu = mean(.epred), l95 = quantile(.epred, 0.025),
+            u95 = quantile(.epred, 0.975), .groups = "drop") %>%
+  mutate(
+    year = year_c + 2012,
+    group_lab = recode(group, "shark" = "Sharks", "ray" = "Rays"),
+    group_lab = factor(group_lab, levels = c("Sharks", "Rays"))
+  )
+
+#### Posterior group slopes 
+
+post_group <- as_draws_df(m_group) %>%
+  transmute(
+    Rays = (exp(b_year_c) - 1) * 100,
+    Sharks = (exp(b_year_c + `b_year_c:groupshark`) - 1) * 100
+  ) %>%
+  pivot_longer(everything(), names_to = "group_lab", values_to = "percent_change") %>%
+  mutate(
+    group_lab = factor(group_lab, levels = c("Rays", "Sharks")),
+    group = recode(group_lab, "Sharks" = "shark", "Rays" = "ray")
+  )
+
+#### A + B: temporal trends by group ####
+
+p_group_trend <- ggplot(group_epred, aes(year, mu, colour = country, fill = country)) +
+  geom_ribbon(aes(ymin = l95, ymax = u95), alpha = 0.16, colour = NA) +
+  geom_line(linewidth = 1.15) +
+  facet_wrap(~group_lab, nrow = 1,
+             labeller = as_labeller(c("Sharks" = "A", "Rays" = "B"))) +
+  scale_colour_manual(values = country_cols) +
+  scale_fill_manual(values = country_cols) +
+  scale_x_continuous(breaks = seq(2012, 2025, 4)) +
+  labs(x = "Year", y = "Expected encounters per trip", colour = NULL, fill = NULL) +
+  theme_clean +
+  theme(
+    axis.text = element_text(size = 9, colour = "black"),
+    axis.title = element_text(size = 10, colour = "black"),
+    strip.background = element_blank(),
+    strip.text = element_text(face = "bold", hjust = 0, size = 11),
+    legend.position = "bottom",
+    legend.text = element_text(size = 9),
+    panel.spacing.x = unit(1, "lines")
+  )
+
+#### C: posterior annual change ####
+
+p_group_post <- ggplot(post_group, aes(percent_change, group_lab, fill = group, colour = group)) +
+  geom_vline(xintercept = 0, linetype = "dashed", colour = "grey45", linewidth = 0.35) +
+  stat_halfeye(.width = 0.95, point_interval = mean_qi, slab_alpha = 0.7,
+               point_size = 1.8, interval_size = 0.9) +
+  scale_colour_manual(values = elasmo_cols, guide = "none") +
+  scale_fill_manual(values = elasmo_cols, guide = "none") +
+  labs(x = "Annual change (% per year)", y = NULL, title = "C") +
+  theme_clean +
+  theme(
+    axis.text = element_text(size = 9, colour = "black"),
+    axis.title = element_text(size = 9, colour = "black"),
+    axis.ticks.y = element_blank(),
+    plot.title = element_text(face = "bold", size = 11, hjust = -0.4, vjust = -6),
+    plot.title.position = "panel",
+    plot.margin = margin(5.5, 5.5, 5.5, 0)
+  )
+
+#### combine ####
+
+p_group <- p_group_trend + p_group_post +
+  plot_layout(widths = c(3.8, 1.2), guides = "collect") &
+  theme(legend.position = "bottom")
+
+p_group
+
+ggsave(file.path(plots_dir, "fig5i_group_trends_by_group.png"),
+       p_group, width = 7.2, height = 4.2, dpi = 600, bg = "white")
+
+ggsave(file.path(plots_dir, "fig5i_group_trends_by_group.pdf"),
+       p_group + theme(text = element_text(family = "sans")),
+       width = 7.2, height = 4.2, bg = "white")
+

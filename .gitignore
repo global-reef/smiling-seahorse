@@ -6,3 +6,7 @@
 .RDataTmp
 .Rhistory
 .Rproj.user/
+
+# seasonal exploratory analysis
+06_seasons.R
+analysis/Analysis_*/site-season/
