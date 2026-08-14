@@ -6,35 +6,35 @@ Formula: n_species ~ year_c + country + factor(month) + (1 + year_c | scientific
          total post-warmup draws = 18000
 
 Multilevel Hyperparameters:
-~scientific_name (Number of levels: 30) 
+~scientific_name (Number of levels: 29) 
                       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sd(Intercept)             0.44      0.17     0.15     0.83 1.00     4099     4435
-sd(year_c)                0.07      0.01     0.04     0.10 1.00     3701     8224
-cor(Intercept,year_c)    -0.31      0.28    -0.77     0.32 1.00     3376     6396
+sd(Intercept)             0.36      0.15     0.08     0.68 1.00     4223     2752
+sd(year_c)                0.06      0.01     0.04     0.10 1.00     3605     7988
+cor(Intercept,year_c)    -0.38      0.30    -0.83     0.33 1.00     2052     3371
 
 ~trip_id (Number of levels: 190) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sd(Intercept)     0.27      0.07     0.12     0.39 1.00     3439     3537
+sd(Intercept)     0.30      0.06     0.17     0.41 1.00     4502     5488
 
 Regression Coefficients:
                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept           1.16      0.19     0.77     1.54 1.00     9082    12063
-year_c             -0.00      0.02    -0.05     0.04 1.00     7815    11325
-countryThailand    -0.38      0.10    -0.59    -0.18 1.00    18519    13917
-factormonth2       -0.03      0.14    -0.31     0.24 1.00    11703    12624
-factormonth3       -0.15      0.14    -0.42     0.12 1.00    12265    14001
-factormonth4       -0.05      0.14    -0.33     0.22 1.00    12953    13475
-factormonth5        0.05      0.31    -0.56     0.68 1.00    19103    14336
-factormonth7        0.52      0.58    -0.62     1.66 1.00    27739    14689
-factormonth9       -0.51      0.72    -1.96     0.86 1.00    29597    13544
-factormonth10       0.10      0.20    -0.30     0.49 1.00    15481    13700
-factormonth11      -0.21      0.15    -0.51     0.09 1.00    12361    14027
-factormonth12      -0.18      0.13    -0.44     0.09 1.00    11446    13174
+Intercept           1.17      0.18     0.80     1.53 1.00     7943    10953
+year_c             -0.00      0.02    -0.05     0.04 1.00     6615    10508
+countryThailand    -0.44      0.11    -0.65    -0.23 1.00    15273    14129
+factormonth2        0.01      0.15    -0.28     0.29 1.00     9707    12953
+factormonth3       -0.13      0.14    -0.42     0.15 1.00     9258    12552
+factormonth4       -0.04      0.15    -0.32     0.25 1.00     9194    12480
+factormonth5        0.02      0.31    -0.60     0.64 1.00    15489    13924
+factormonth7        0.55      0.58    -0.58     1.68 1.00    21376    14676
+factormonth9       -0.51      0.73    -1.98     0.88 1.00    25026    13427
+factormonth10       0.11      0.21    -0.30     0.52 1.00    12024    13030
+factormonth11      -0.20      0.16    -0.51     0.11 1.00     9944    12708
+factormonth12      -0.17      0.14    -0.44     0.10 1.00     9438    12370
 
 Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-shape     4.97      0.83     3.60     6.83 1.00     8598    10596
+shape     4.63      0.73     3.41     6.24 1.00     9257    11642
 
-Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
+Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).

@@ -138,12 +138,25 @@ write_csv(
 saveRDS(m_group, file.path(model_dir, "m_group.rds"))
 
 ### 05. DECOMPOSITION 2: SPECIES-LEVEL HIERARCHICAL MODEL ####
-
 trip_species_dat <- trip_species_dat %>%
+  mutate(scientific_name = recode(scientific_name,
+                                  "Acroteriobatus spp" = "Rhinobatidae spp"
+  )) %>%
+  group_by(across(-n_species)) %>%
+  summarise(n_species = sum(n_species), .groups = "drop") %>%
   mutate(
     scientific_name = factor(scientific_name),
     country = relevel(factor(country), ref = "Myanmar")
   )
+
+elasmos <- elasmos %>%
+  mutate(scientific_name = recode(scientific_name,
+                                  "Acroteriobatus spp" = "Rhinobatidae spp"
+  ))
+
+trip_species_dat %>%
+  filter(scientific_name == "Rhinobatidae spp") %>%
+  summarise(records = n(), individuals = sum(n_species))
 
 m_species <- brm(
   n_species ~ year_c + country + factor(month) +
@@ -154,7 +167,7 @@ m_species <- brm(
   prior = priors_nb,
   chains = 4, iter = 6000, warmup = 1500,
   control = list(adapt_delta = 0.97, max_treedepth = 13),
-  backend = "cmdstanr",
+  # backend = "cmdstanr",
   seed = 123,
   file = file.path(model_dir, "m_species")
 )
@@ -223,8 +236,7 @@ dir.create(data_clean_dir, showWarnings = FALSE, recursive = TRUE)
 #### 01. IUCN LOOKUP TABLE ####
 
 iucn_lookup <- tribble(
-  ~scientific_name,              ~iucn_status, ~iucn_link,                                                                 ~criteria,
-  "Acroteriobatus spp",          NA,           NA,                                                                         NA,
+  ~scientific_name,              ~iucn_status, ~iucn_link,                                                                 ~criteria,                                                                     NA,
   "Aetobatus ocellatus",         "EN",         "https://www.iucnredlist.org/search?query=Aetobatus%20ocellatus&searchType=species", "A2bcd",
   "Atelomycterus marmoratus",    "NT",         "https://www.iucnredlist.org/species/41730/124414963",                     "A2cd",
   "Batidae spp",                 NA,           NA,                                                                         NA,
