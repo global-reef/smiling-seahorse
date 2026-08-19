@@ -96,6 +96,8 @@ source(file.path("analysis", "01_CLEAN.R"))
 source(file.path("analysis", "02_EXPLORE.R"))
 source(file.path("analysis", "03_MODEL.R"))
 source(file.path("analysis", "04_SPP_MODELS.R"))
+source(file.path("analysis", "05_PLOTS.R"))
+source(file.path("analysis", "06_MAP.R"))
 
 ### 04. END ####
 

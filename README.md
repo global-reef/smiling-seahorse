@@ -46,6 +46,8 @@ The `analysis/` folder contains structured R scripts:
 -   `03_MODEL.R` -- Bayesian hierarchical models (trip, group, species)
 -   `04_SPP_MODELS.R` -- Species-level trend extraction and
     visualisation
+-   `05_PLOTS.R` -- Final figure code for publication
+-   `06_MAP.R` -- Map of study sites with bounding boxes
 
 Supporting directories:
 
@@ -74,6 +76,8 @@ smiling-seahorse/
     ├── 02_EXPLORE.R
     ├── 03_MODEL.R
     ├── 04_SPP_MODELS.R
+    ├── 05_PLOTS.R
+    ├── 04_MAP.R
     ├── data_raw/
     ├── data_clean/
     ├── figures/
@@ -135,6 +139,8 @@ Or execute scripts sequentially:
     02_EXPLORE.R
     03_MODEL.R
     04_SPP_MODELS.R
+    05_PLOTS.R
+    06_MAP.R
 
 ------------------------------------------------------------------------
 
